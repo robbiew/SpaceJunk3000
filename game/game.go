@@ -1,10 +1,13 @@
 package game
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"spacejunk3000/enemy"
 	"spacejunk3000/player"
+	"strings"
 	"time"
 )
 
@@ -13,10 +16,20 @@ type Game struct {
 	Enemies []enemy.Enemy
 }
 
+// NewGame creates a new game instance or loads an existing one.
 func NewGame(playerName string, charType player.CharacterType) (*Game, error) {
-	p, err := player.NewPlayer(playerName, charType)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create player: %v", err)
+	// Load player data if it exists or create a new player.
+	p, err := player.LoadPlayer(playerName)
+	if err != nil || p == nil { // If there's no existing player, create a new one.
+		p = &player.Player{
+			Name:   playerName,
+			Type:   charType,
+			Health: 12, // Default health or other initialization parameters
+			// Initialize other necessary fields
+		}
+		if err := player.SavePlayer(p); err != nil {
+			return nil, fmt.Errorf("failed to save new player: %v", err)
+		}
 	}
 
 	enemies, err := enemy.LoadEnemies("data/enemies.json")
@@ -24,7 +37,36 @@ func NewGame(playerName string, charType player.CharacterType) (*Game, error) {
 		return nil, fmt.Errorf("failed to load enemies: %v", err)
 	}
 
+	// If the player data was loaded successfully and the character type needs to be updated.
+	if p != nil && p.Type != charType {
+		p.Type = charType
+		if err := player.SavePlayer(p); err != nil {
+			return nil, fmt.Errorf("failed to update player type: %v", err)
+		}
+	}
+
 	return &Game{Player: p, Enemies: enemies}, nil
+}
+
+func StartGame(playerID string) (*player.Player, error) {
+	p, err := player.LoadPlayer(playerID)
+	if err != nil || p == nil { // New player or failed to load existing player
+		charType := SelectCharacterType() // Let the user select a character type
+		p = &player.Player{
+			Name:   playerID,
+			Type:   charType,
+			Health: 12,
+			Alive:  true,
+		}
+		if err := player.SavePlayer(p); err != nil {
+			return nil, fmt.Errorf("failed to save new player: %v", err)
+		}
+	} else if !p.Alive { // Check if the player is starting over due to death
+		player.ResetPlayer(p)
+		player.SavePlayer(p)
+	}
+
+	return p, nil
 }
 
 func (g *Game) Start() error {
@@ -51,4 +93,44 @@ func (g *Game) Start() error {
 	// }
 
 	return nil
+}
+
+func UpdateHealth(p *player.Player, delta int) {
+	p.Health += delta
+	if p.Health <= 0 {
+		p.Alive = false
+		player.SavePlayer(p) // Save the dead state
+		fmt.Println("You have died and must start over.")
+		player.ResetPlayer(p) // Reset for new game start
+	}
+	player.SavePlayer(p) // Save any changes to player data
+}
+
+func SelectCharacterType() player.CharacterType {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Choose your character type:")
+	fmt.Println("1. Pirate")
+	fmt.Println("2. Space Marine")
+	fmt.Println("3. Empath")
+
+	for {
+		fmt.Print("Enter choice (1-3): ")
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Invalid input, please try again.")
+			continue
+		}
+		input = strings.TrimSpace(input)
+
+		switch input {
+		case "1", "Pirate":
+			return player.Pirate
+		case "2", "Space Marine":
+			return player.SpaceMarine
+		case "3", "Empath":
+			return player.Empath
+		default:
+			fmt.Println("Invalid choice, please select a valid character type.")
+		}
+	}
 }

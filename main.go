@@ -9,16 +9,34 @@ import (
 
 func main() {
 	fmt.Println("Welcome to Space Junk 3000")
-	playerName := "EnterYourName" // Placeholder for dynamic player name retrieval
-	charType := player.Pirate     // Placeholder for dynamic character type selection
 
-	g, err := game.NewGame(playerName, charType)
-	if err != nil {
-		log.Fatalf("Failed to initialize game: %v", err)
-	}
+	// Assuming playerName is retrieved dynamically from BBS drop file
+	playerName := "ExamplePlayerName" // Placeholder: replace with actual code to retrieve from BBS drop file
 
-	err = g.Start()
+	// Load or create player
+	p, err := player.LoadPlayer(playerName)
 	if err != nil {
-		log.Fatalf("Failed to start game: %v", err)
+		fmt.Println("No existing player found or error loading player:", err)
+		fmt.Println("Please select your character type:")
+		charType := game.SelectCharacterType()
+
+		// Create a new player with default values
+		p = &player.Player{
+			Name:      playerName,
+			Type:      charType,
+			Health:    12,
+			Inventory: []player.ItemType{player.Sword, player.Shield}, // Initialize inventory here
+			Alive:     true,                                           // Set other necessary fields
+			Stats: player.Stats{
+				Might:   1,
+				Cunning: 2,
+				Wisdom:  4,
+			},
+		}
+
+		// Save the new player
+		if err := player.SavePlayer(p); err != nil {
+			log.Fatalf("Failed to save new player: %v", err)
+		}
 	}
 }
