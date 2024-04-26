@@ -1,4 +1,4 @@
-package util
+package doorutil
 
 import (
 	"bufio"

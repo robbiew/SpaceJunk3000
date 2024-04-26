@@ -19,3 +19,6 @@
 
 # Go workspace file
 go.work
+
+.spacejunk3000
+data/u-*

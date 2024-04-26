@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"spacejunk3000/doorutil"
 	"spacejunk3000/game"
 	"spacejunk3000/player"
-	"spacejunk3000/util"
 )
 
 func main() {
@@ -20,7 +20,7 @@ func main() {
 	}
 
 	// Get BBS dropfile information about the user using the DropFileData function
-	dropAlias, dropTimeLeft, dropEmulation, nodeNum := util.DropFileData(*dropfilePath)
+	dropAlias, dropTimeLeft, dropEmulation, nodeNum := doorutil.DropFileData(*dropfilePath)
 
 	// Use dropAlias as the playerName
 	playerName := dropAlias
@@ -36,14 +36,17 @@ func main() {
 		p = &player.Player{
 			Name:      playerName,
 			Type:      charType,
-			Health:    dropTimeLeft,                                   // Using dropTimeLeft as health
+			Health:    12,                                             // Using dropTimeLeft as health
 			Inventory: []player.ItemType{player.Sword, player.Shield}, // Initialize inventory here
 			Alive:     true,                                           // Set other necessary fields
 			Stats: player.Stats{
-				Might:   dropEmulation, // Using dropEmulation as Might
+				Might:   4, // Using dropEmulation as Might
 				Cunning: 2,
-				Wisdom:  nodeNum, // Using nodeNum as Wisdom
+				Wisdom:  1, // Using nodeNum as Wisdom
 			},
+			TimeLeft:  dropTimeLeft,
+			Emulation: dropEmulation,
+			NodeNum:   nodeNum,
 		}
 
 		// Save the new player

@@ -8,12 +8,15 @@ import (
 
 // Define the Player struct with exported Inventory field
 type Player struct {
-	Name      string        `json:"name"`
-	Type      CharacterType `json:"type"`
-	Health    int           `json:"health"`
-	Stats     Stats         `json:"stats"`
+	Name      string        `json:"name"`      // Exported field
+	Type      CharacterType `json:"type"`      // Exported field
+	Health    int           `json:"health"`    // Exported field
+	Stats     Stats         `json:"stats"`     // Exported field
 	Inventory []ItemType    `json:"inventory"` // Exported field
-	Alive     bool          `json:"alive"`
+	Alive     bool          `json:"alive"`     // Unexported field
+	TimeLeft  int           `json:"-"`         // Unexported field
+	Emulation int           `json:"-"`         // Unexported field
+	NodeNum   int           `json:"-"`         // Unexported field
 }
 
 type CharacterType string
@@ -40,7 +43,7 @@ const (
 )
 
 // NewPlayer initializes a new player with default values and handles potential errors.
-func NewPlayer(name string, charType CharacterType) (*Player, error) {
+func NewPlayer(name string, charType CharacterType, dropTimeLeft, dropEmulation, nodeNum int) (*Player, error) {
 	if name == "" {
 		return nil, fmt.Errorf("player name cannot be empty")
 	}
@@ -49,7 +52,17 @@ func NewPlayer(name string, charType CharacterType) (*Player, error) {
 
 	stats := Stats{Might: 1, Cunning: 2, Wisdom: 4}
 	inventory := []ItemType{Sword, Shield}
-	return &Player{Name: name, Type: charType, Health: 12, Stats: stats, Inventory: inventory, Alive: true}, nil
+	return &Player{
+		Name:      name,
+		Type:      charType,
+		Health:    12,
+		Stats:     stats,
+		Inventory: inventory,
+		Alive:     true,
+		TimeLeft:  dropTimeLeft,
+		Emulation: dropEmulation,
+		NodeNum:   nodeNum,
+	}, nil
 }
 
 // SavePlayer serializes the player data to JSON and writes it to a file.
@@ -64,7 +77,7 @@ func SavePlayer(p *Player) error {
 	fmt.Println("Serialized player data:", string(data))
 
 	// Filename based on player name, which is the unique ID
-	filename := fmt.Sprintf("data/%s.json", p.Name)
+	filename := fmt.Sprintf("data/u-%s.json", p.Name)
 	if err := os.WriteFile(filename, data, 0644); err != nil {
 		return fmt.Errorf("error writing player data to file: %v", err)
 	}
@@ -74,7 +87,7 @@ func SavePlayer(p *Player) error {
 
 // LoadPlayer deserializes player data from a JSON file.
 func LoadPlayer(name string) (*Player, error) {
-	filename := fmt.Sprintf("data/%s.json", name)
+	filename := fmt.Sprintf("data/u-%s.json", name)
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("error reading player data file: %v", err) // File not found could mean new player
