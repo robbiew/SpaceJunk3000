@@ -39,4 +39,14 @@ func main() {
 			log.Fatalf("Failed to save new player: %v", err)
 		}
 	}
+	// Initialize and start the game
+	g, err := game.NewGame(playerName, p.Type) // Pass playerName and player type
+	if err != nil {
+		log.Fatalf("Failed to initialize game: %v", err)
+	}
+
+	err = g.Start()
+	if err != nil {
+		log.Fatalf("Failed to start game: %v", err)
+	}
 }
