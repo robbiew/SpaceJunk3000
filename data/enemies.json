@@ -1,0 +1,17 @@
+[
+    {
+        "name": "Space Goblin",
+        "health": 10,
+        "damage": 3
+    },
+    {
+        "name": "Asteroid Worm",
+        "health": 15,
+        "damage": 5
+    },
+    {
+        "name": "Nebula Dragon",
+        "health": 20,
+        "damage": 8
+    }
+]
