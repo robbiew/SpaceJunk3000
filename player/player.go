@@ -4,20 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"spacejunk3000/weapon" // Import the weapon package
+	"spacejunk3000/weapon"
+	"time"
 )
 
 // Define the Player struct with exported Inventory field
 type Player struct {
-	Name      string         `json:"name"`             // Exported field
-	Type      CharacterType  `json:"type"`             // Exported field
-	Health    int            `json:"health"`           // Exported field
-	Stats     Stats          `json:"stats"`            // Exported field
-	Alive     bool           `json:"alive"`            // Unexported field
-	TimeLeft  int            `json:"-"`                // Unexported field
-	Emulation int            `json:"-"`                // Unexported field
-	NodeNum   int            `json:"-"`                // Unexported field
-	Weapon    *weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
+	Name        string         `json:"name"`             // Exported field
+	Type        CharacterType  `json:"type"`             // Exported field
+	Health      int            `json:"health"`           // Exported field
+	Stats       Stats          `json:"stats"`            // Exported field
+	Alive       bool           `json:"alive"`            // Unexported field
+	TimeLeft    int            `json:"-"`                // Unexported field
+	Emulation   int            `json:"-"`                // Unexported field
+	NodeNum     int            `json:"-"`                // Unexported field
+	Weapon      *weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
+	WeaponSlots int            `json:"weapon_slots"`     // Number of filled weapon slots
+	ItemSlots   int            `json:"item_slots"`       // Number of filled item slots
+	MaxSlots    int            `json:"max_slots"`        // Maximum number of total slots
 }
 
 type CharacterType string
@@ -39,22 +43,30 @@ func NewPlayer(name string, charType CharacterType, dropTimeLeft, dropEmulation,
 	if name == "" {
 		return nil, fmt.Errorf("player name cannot be empty")
 	}
+
 	// Optionally, add more validation if necessary:
 	// if charType is not one of the predefined ones, return an error.
 
 	stats := Stats{Might: 1, Cunning: 2, Wisdom: 4}
 
-	return &Player{
-		Name:      name,
-		Type:      charType,
-		Health:    12,
-		Stats:     stats,
-		Alive:     true,
-		TimeLeft:  dropTimeLeft,
-		Emulation: dropEmulation,
-		NodeNum:   nodeNum,
-		Weapon:    nil,
-	}, nil
+	p := &Player{
+		Name:        name,
+		Type:        charType,
+		Health:      12,
+		Stats:       stats,
+		Alive:       true,
+		TimeLeft:    dropTimeLeft,
+		Emulation:   dropEmulation,
+		NodeNum:     nodeNum,
+		WeaponSlots: 0,
+		ItemSlots:   0,
+		MaxSlots:    4,
+	}
+
+	fmt.Printf("New player created: %+v\n", p) // Debug output
+	time.Sleep(2 * time.Second)                // Simulate some processing time
+
+	return p, nil
 }
 
 // SavePlayer serializes the player data to JSON and writes it to a file.
@@ -66,7 +78,7 @@ func SavePlayer(p *Player) error {
 	}
 
 	// Print out the serialized player data for debugging
-	fmt.Println("Serialized player data:", string(data))
+	// fmt.Println("Serialized player data:", string(data))
 
 	// Filename based on player name, which is the unique ID
 	filename := fmt.Sprintf("data/u-%s.json", p.Name)
@@ -95,6 +107,9 @@ func ResetPlayer(p *Player) {
 	p.Health = 12
 	p.Alive = true
 	p.Weapon = nil
+	p.WeaponSlots = 0
+	p.ItemSlots = 0
+	p.MaxSlots = 4
 
 	// Additional reset logic as needed
 }

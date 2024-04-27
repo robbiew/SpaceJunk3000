@@ -28,7 +28,7 @@ func main() {
 	// Load or create player
 	p, err := player.LoadPlayer(playerName)
 	if err != nil {
-		fmt.Println("No existing player found or error loading player:", err)
+		// fmt.Println("No existing player found or error loading player:", err)
 		fmt.Println("Please select your character type:")
 		charType := game.SelectCharacterType()
 
@@ -36,16 +36,17 @@ func main() {
 		p = &player.Player{
 			Name:   playerName,
 			Type:   charType,
-			Health: 12,   // Using dropTimeLeft as health
-			Alive:  true, // Set other necessary fields
+			Health: 12,
+			Alive:  true,
 			Stats: player.Stats{
-				Might:   4, // Using dropEmulation as Might
+				Might:   4,
 				Cunning: 2,
-				Wisdom:  1, // Using nodeNum as Wisdom
+				Wisdom:  1,
 			},
 			TimeLeft:  dropTimeLeft,
 			Emulation: dropEmulation,
 			NodeNum:   nodeNum,
+			MaxSlots:  4,
 		}
 
 		// Save the new player
@@ -55,13 +56,23 @@ func main() {
 	}
 
 	// Initialize and start the game
-	g, err := game.NewGame(playerName, p.Type) // Pass playerName and player type
+	g, err := game.NewGame(playerName, p.Type)
 	if err != nil {
 		log.Fatalf("Failed to initialize game: %v", err)
 	}
 
-	err = g.Start()
+	// Pass the list of weapons to the StartGame function
+	player, err := game.StartGame(playerName, g.Weapons)
 	if err != nil {
 		log.Fatalf("Failed to start game: %v", err)
+	}
+
+	fmt.Printf("Player %s has entered the game as a %s with %d health points", player.Name, player.Type, player.Health)
+
+	// Check if the player has a weapon equipped
+	if player.Weapon != nil {
+		fmt.Printf(" and is equipped with %s.\n", player.Weapon.Name)
+	} else {
+		fmt.Println(" and is unarmed.")
 	}
 }

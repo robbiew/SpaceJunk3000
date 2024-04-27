@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"spacejunk3000/enemy"
+	"spacejunk3000/item"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
 	"strings"
@@ -23,14 +24,33 @@ func NewGame(playerName string, charType player.CharacterType) (*Game, error) {
 	// Load player data if it exists or create a new player.
 	p, err := player.LoadPlayer(playerName)
 	if err != nil || p == nil { // If there's no existing player, create a new one.
-		p = &player.Player{
-			Name:   playerName,
-			Type:   charType,
-			Health: 12, // Default health or other initialization parameters
-			// Initialize other necessary fields
+		p, err = player.NewPlayer(playerName, charType, 0, 0, 0)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create new player: %v", err)
 		}
 		if err := player.SavePlayer(p); err != nil {
 			return nil, fmt.Errorf("failed to save new player: %v", err)
+		}
+	} else if p.Weapon == nil { // Check if the player does not have a weapon equipped
+		// Load weapons
+		weapons, err := weapon.LoadWeapons("data/weapons.json")
+		if err != nil {
+			return nil, fmt.Errorf("failed to load weapons: %v", err)
+		}
+
+		// Randomly select a weapon for the player
+		source := rand.NewSource(time.Now().UnixNano())
+		random := rand.New(source)
+		randomIndex := random.Intn(len(weapons))
+
+		// Equip the randomly selected weapon to the player
+		if err := EquipWeapon(p, &weapons[randomIndex]); err != nil {
+			return nil, fmt.Errorf("failed to equip weapon: %v", err)
+		}
+
+		// Save the player data
+		if err := player.SavePlayer(p); err != nil {
+			return nil, fmt.Errorf("failed to save player: %v", err)
 		}
 	}
 
@@ -39,87 +59,55 @@ func NewGame(playerName string, charType player.CharacterType) (*Game, error) {
 		return nil, fmt.Errorf("failed to load enemies: %v", err)
 	}
 
-	// If the player data was loaded successfully and the character type needs to be updated.
-	if p != nil && p.Type != charType {
-		p.Type = charType
-		if err := player.SavePlayer(p); err != nil {
-			return nil, fmt.Errorf("failed to update player type: %v", err)
-		}
-	}
-
-	// Load weapons
-	weapons, err := weapon.LoadWeapons("data/weapons.json")
-	if err != nil {
-		return nil, fmt.Errorf("failed to load weapons: %v", err)
-	}
-
-	// Randomly select a weapon for the player
-	randomIndex := rand.Intn(len(weapons))
-	selectedWeapon := weapons[randomIndex]
-
-	// Assign the selected weapon to the player
-	p.Weapon = &selectedWeapon
-
-	// Save the updated player data
-	if err := player.SavePlayer(p); err != nil {
-		return nil, fmt.Errorf("failed to save player: %v", err)
-	}
-
-	// Save weapons
-	if err := weapon.SaveWeapons("data/weapons.json", weapons); err != nil {
-		return nil, fmt.Errorf("failed to save weapons: %v", err)
-	}
-
-	return &Game{Player: p, Enemies: enemies, Weapons: weapons}, nil
+	return &Game{Player: p, Enemies: enemies}, nil
 }
 
 // StartGame initializes and starts the game.
-func StartGame(playerID string) (*player.Player, error) {
+func StartGame(playerID string, weapons []weapon.Weapon) (*player.Player, error) {
 	p, err := player.LoadPlayer(playerID)
 	if err != nil || p == nil { // New player or failed to load existing player
 		charType := SelectCharacterType() // Let the user select a character type
-		p = &player.Player{
-			Name:   playerID,
-			Type:   charType,
-			Health: 12,
-			Alive:  true,
+		p, err = player.NewPlayer(playerID, charType, 0, 0, 0)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create new player: %v", err)
 		}
+
+		// Randomly select a weapon for the player
+		source := rand.NewSource(time.Now().UnixNano())
+		random := rand.New(source)
+		randomIndex := random.Intn(len(weapons))
+
+		// Equip the randomly selected weapon to the player
+		if err := EquipWeapon(p, &weapons[randomIndex]); err != nil {
+			return nil, fmt.Errorf("failed to equip weapon: %v", err)
+		}
+
+		// Save the player data
 		if err := player.SavePlayer(p); err != nil {
 			return nil, fmt.Errorf("failed to save new player: %v", err)
 		}
+
 	} else if !p.Alive { // Check if the player is starting over due to death
 		player.ResetPlayer(p)
 		player.SavePlayer(p)
+	} else if p.Weapon == nil { // Check if the player does not have a weapon equipped
+		// Randomly select a weapon for the player
+		source := rand.NewSource(time.Now().UnixNano())
+		random := rand.New(source)
+		randomIndex := random.Intn(len(weapons))
+
+		// Equip the randomly selected weapon to the player
+		if err := EquipWeapon(p, &weapons[randomIndex]); err != nil {
+			return nil, fmt.Errorf("failed to equip weapon: %v", err)
+		}
+
+		// Save the player data
+		if err := player.SavePlayer(p); err != nil {
+			return nil, fmt.Errorf("failed to save player: %v", err)
+		}
 	}
 
 	return p, nil
-}
-
-// Start begins the game.
-func (g *Game) Start() error {
-	fmt.Println("Game has started.")
-	fmt.Printf("Player %s has entered the game as a %s with %d health points and equipped with %s.\n", g.Player.Name, g.Player.Type, g.Player.Health, g.Player.Weapon.Name)
-
-	if len(g.Enemies) == 0 {
-		return fmt.Errorf("no enemies available for an encounter")
-	}
-
-	// Create a new local random generator
-	src := rand.NewSource(time.Now().UnixNano())
-	r := rand.New(src)
-
-	// Use the local random generator
-	randomIndex := r.Intn(len(g.Enemies))
-	randomEnemy := g.Enemies[randomIndex]
-
-	fmt.Printf("A wild %s appears! It has %d health and can deal %d damage.\n", randomEnemy.Name, randomEnemy.Health, randomEnemy.Damage)
-
-	// Implement encounter logic
-	// if err := g.handleEncounter(randomEnemy); err != nil {
-	//     return fmt.Errorf("encounter failed: %v", err)
-	// }
-
-	return nil
 }
 
 // UpdateHealth updates the player's health and handles death.
@@ -162,4 +150,37 @@ func SelectCharacterType() player.CharacterType {
 			fmt.Println("Invalid choice, please select a valid character type.")
 		}
 	}
+}
+
+// EquipWeapon equips a weapon to the player if there are available slots.
+func EquipWeapon(p *player.Player, w *weapon.Weapon) error {
+	// Check if there are enough weapon slots to equip the weapon
+	if p.WeaponSlots+w.Slots > p.MaxSlots {
+		return fmt.Errorf("cannot carry that much")
+	}
+
+	// Equip the weapon to the player
+	p.Weapon = w
+	p.WeaponSlots += w.Slots
+
+	return nil
+}
+
+// UnequipWeapon unequips the player's weapon.
+func UnequipWeapon(p *player.Player) {
+	if p.Weapon != nil {
+		p.Weapon = nil
+		p.WeaponSlots--
+	}
+}
+
+// EquipItem equips an item to the player if there are available slots.
+func EquipItem(p *player.Player, i *item.Item) error {
+	// Implement logic to equip an item similar to EquipWeapon
+	return nil
+}
+
+// UnequipItem unequips an item from the player.
+func UnequipItem(p *player.Player) {
+	// Implement logic to unequip an item similar to UnequipWeapon
 }
