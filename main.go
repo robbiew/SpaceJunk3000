@@ -49,6 +49,13 @@ func main() {
 			MaxSlots:  4,
 		}
 
+		// Assign crew dice based on character type
+		crewDice, err := player.GetCrewDice(charType)
+		if err != nil {
+			log.Fatalf("Failed to get crew dice: %v", err)
+		}
+		p.CrewDice = crewDice
+
 		// Save the new player
 		if err := player.SavePlayer(p); err != nil {
 			log.Fatalf("Failed to save new player: %v", err)

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"spacejunk3000/weapon"
-	"time"
 )
 
 // Define the Player struct with exported Inventory field
@@ -22,6 +21,7 @@ type Player struct {
 	WeaponSlots int            `json:"weapon_slots"`     // Number of filled weapon slots
 	ItemSlots   int            `json:"item_slots"`       // Number of filled item slots
 	MaxSlots    int            `json:"max_slots"`        // Maximum number of total slots
+	CrewDice    CrewDice       `json:"crew_dice"`
 }
 
 type CharacterType string
@@ -38,35 +38,63 @@ type Stats struct {
 	Wisdom  int `json:"wisdom"`
 }
 
-// NewPlayer initializes a new player with default values and handles potential errors.
-func NewPlayer(name string, charType CharacterType, dropTimeLeft, dropEmulation, nodeNum int) (*Player, error) {
-	if name == "" {
-		return nil, fmt.Errorf("player name cannot be empty")
+// CrewDice represents the crew dice associated with each character type.
+type CrewDice struct {
+	DieSide1 string `json:"die_side_1"`
+	DieSide2 string `json:"die_side_2"`
+	DieSide3 string `json:"die_side_3"`
+	DieSide4 string `json:"die_side_4"`
+	DieSide5 string `json:"die_side_5"`
+	DieSide6 string `json:"die_side_6"`
+}
+
+// NewPlayer creates a new player instance with the provided attributes.
+func NewPlayer(name string, charType CharacterType, health int, timeLeft int, nodeNum int) (*Player, error) {
+
+	return &Player{
+		Name:     name,
+		Type:     charType,
+		Health:   health,
+		TimeLeft: timeLeft,
+		NodeNum:  nodeNum,
+		Alive:    true,
+		MaxSlots: 4, // Default value, can be modified if needed
+	}, nil
+}
+
+// getCrewDice returns the CrewDice associated with the provided character type.
+func GetCrewDice(charType CharacterType) (CrewDice, error) {
+	switch charType {
+	case Pirate:
+		return CrewDice{
+			DieSide1: "might",
+			DieSide2: "wisdom",
+			DieSide3: "might",
+			DieSide4: "double cunning",
+			DieSide5: "double might",
+			DieSide6: "cunning",
+		}, nil
+	case SpaceMarine:
+		return CrewDice{
+			DieSide1: "cunning",
+			DieSide2: "wisdom",
+			DieSide3: "cunning",
+			DieSide4: "double cunning",
+			DieSide5: "double might",
+			DieSide6: "might",
+		}, nil
+	case Empath:
+		return CrewDice{
+			DieSide1: "wisdom",
+			DieSide2: "might",
+			DieSide3: "wisdom",
+			DieSide4: "double cunning",
+			DieSide5: "double wisdom",
+			DieSide6: "cunning",
+		}, nil
+	default:
+		return CrewDice{}, fmt.Errorf("unsupported character type")
 	}
-
-	// Optionally, add more validation if necessary:
-	// if charType is not one of the predefined ones, return an error.
-
-	stats := Stats{Might: 1, Cunning: 2, Wisdom: 4}
-
-	p := &Player{
-		Name:        name,
-		Type:        charType,
-		Health:      12,
-		Stats:       stats,
-		Alive:       true,
-		TimeLeft:    dropTimeLeft,
-		Emulation:   dropEmulation,
-		NodeNum:     nodeNum,
-		WeaponSlots: 0,
-		ItemSlots:   0,
-		MaxSlots:    4,
-	}
-
-	fmt.Printf("New player created: %+v\n", p) // Debug output
-	time.Sleep(2 * time.Second)                // Simulate some processing time
-
-	return p, nil
 }
 
 // SavePlayer serializes the player data to JSON and writes it to a file.
@@ -78,7 +106,7 @@ func SavePlayer(p *Player) error {
 	}
 
 	// Print out the serialized player data for debugging
-	// fmt.Println("Serialized player data:", string(data))
+	fmt.Println("Serialized player data:", string(data))
 
 	// Filename based on player name, which is the unique ID
 	filename := fmt.Sprintf("data/u-%s.json", p.Name)
