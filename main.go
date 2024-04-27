@@ -65,9 +65,12 @@ func main() {
 
 	fmt.Printf("Player %s has entered the game as a %s with %d health points", player.Name, player.Type, player.Health)
 
-	// Check if the player has a weapon equipped
-	if player.Weapon != nil {
-		fmt.Printf(" and is equipped with %s.\n", player.Weapon.Name)
+	// Check if the player has any weapons equipped
+	if len(player.Weapons) > 0 {
+		fmt.Printf(" and is equipped with:\n")
+		for _, w := range player.Weapons {
+			fmt.Printf("- %s\n", w.Name)
+		}
 	} else {
 		fmt.Println(" and is unarmed.")
 	}

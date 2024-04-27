@@ -9,19 +9,19 @@ import (
 
 // Define the Player struct with exported Inventory field
 type Player struct {
-	Name        string         `json:"name"`             // Exported field
-	Type        CharacterType  `json:"type"`             // Exported field
-	Health      int            `json:"health"`           // Exported field
-	Stats       Stats          `json:"stats"`            // Exported field
-	Alive       bool           `json:"alive"`            // Unexported field
-	TimeLeft    int            `json:"-"`                // Unexported field
-	Emulation   int            `json:"-"`                // Unexported field
-	NodeNum     int            `json:"-"`                // Unexported field
-	Weapon      *weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
-	WeaponSlots int            `json:"weapon_slots"`     // Number of filled weapon slots
-	ItemSlots   int            `json:"item_slots"`       // Number of filled item slots
-	MaxSlots    int            `json:"max_slots"`        // Maximum number of total slots
-	CrewDice    CrewDice       `json:"crew_dice"`
+	Name        string           `json:"name"`             // Exported field
+	Type        CharacterType    `json:"type"`             // Exported field
+	Health      int              `json:"health"`           // Exported field
+	Stats       Stats            `json:"stats"`            // Exported field
+	Alive       bool             `json:"alive"`            // Unexported field
+	TimeLeft    int              `json:"-"`                // Unexported field
+	Emulation   int              `json:"-"`                // Unexported field
+	NodeNum     int              `json:"-"`                // Unexported field
+	Weapons     []*weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
+	WeaponSlots int              `json:"weapon_slots"`     // Number of filled weapon slots
+	ItemSlots   int              `json:"item_slots"`       // Number of filled item slots
+	MaxSlots    int              `json:"max_slots"`        // Maximum number of total slots
+	CrewDice    CrewDice         `json:"crew_dice"`
 }
 
 type CharacterType string
@@ -70,7 +70,8 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 		CrewDice:  dice,
 		Emulation: emulation,
 		Alive:     true,
-		MaxSlots:  4, // Default value, can be modified if needed
+		MaxSlots:  4,                         // Default value, can be modified if needed
+		Weapons:   make([]*weapon.Weapon, 0), // Initialize the weapons slice
 	}, nil
 }
 
@@ -160,10 +161,32 @@ func LoadPlayer(name string) (*Player, error) {
 func ResetPlayer(p *Player) {
 	p.Health = 12
 	p.Alive = true
-	p.Weapon = nil
+	p.Weapons = nil
 	p.WeaponSlots = 0
 	p.ItemSlots = 0
 	p.MaxSlots = 4
 
 	// Additional reset logic as needed
+}
+
+// EquipWeapon equips a weapon to the player if there are available slots.
+func (p *Player) EquipWeapon(w *weapon.Weapon) error {
+	// Check if there are enough weapon slots to equip the weapon
+	if p.WeaponSlots+w.Slots > p.MaxSlots {
+		return fmt.Errorf("cannot carry that much")
+	}
+
+	// Equip the weapon to the player
+	p.Weapons = append(p.Weapons, w)
+	p.WeaponSlots += w.Slots
+
+	return nil
+}
+
+// UnequipWeapon unequips the player's weapon.
+func (p *Player) UnequipWeapon() {
+	if len(p.Weapons) > 0 {
+		p.Weapons = p.Weapons[:len(p.Weapons)-1]
+		p.WeaponSlots--
+	}
 }

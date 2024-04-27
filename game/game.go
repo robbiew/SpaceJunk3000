@@ -48,7 +48,7 @@ func InitializePlayer(playerName string, weapons []weapon.Weapon) (*player.Playe
 	} else if !p.Alive { // Check if the player is starting over due to death
 		player.ResetPlayer(p)
 		player.SavePlayer(p)
-	} else if p.Weapon == nil { // Check if the player does not have a weapon equipped
+	} else if p.Weapons == nil { // Check if the player does not have a weapon equipped
 		// Randomly select a weapon for the player
 		source := rand.NewSource(time.Now().UnixNano())
 		random := rand.New(source)
@@ -146,7 +146,7 @@ func EquipWeapon(p *player.Player, w *weapon.Weapon) error {
 	}
 
 	// Equip the weapon to the player
-	p.Weapon = w
+	p.Weapons = []*weapon.Weapon{w} // Change the type of p.Weapon to []*weapon.Weapon
 	p.WeaponSlots += w.Slots
 
 	return nil
@@ -154,8 +154,8 @@ func EquipWeapon(p *player.Player, w *weapon.Weapon) error {
 
 // UnequipWeapon unequips the player's weapon.
 func UnequipWeapon(p *player.Player) {
-	if p.Weapon != nil {
-		p.Weapon = nil
+	if p.Weapons != nil {
+		p.Weapons = nil
 		p.WeaponSlots--
 	}
 }
