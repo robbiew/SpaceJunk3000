@@ -19,55 +19,13 @@ type Game struct {
 	Weapons []weapon.Weapon
 }
 
-// NewGame creates a new game instance or loads an existing one.
-func NewGame(playerName string, charType player.CharacterType) (*Game, error) {
-	// Load player data if it exists or create a new player.
+// InitializePlayer initializes a player by loading an existing one or creating a new one.
+func InitializePlayer(playerName string, weapons []weapon.Weapon) (*player.Player, error) {
+	// Load existing player or create a new one if not found
 	p, err := player.LoadPlayer(playerName)
-	if err != nil || p == nil { // If there's no existing player, create a new one.
+	if err != nil || p == nil {
+		charType := SelectCharacterType() // Let the user select a character type if creating a new player
 		p, err = player.NewPlayer(playerName, charType, 0, 0, 0)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create new player: %v", err)
-		}
-		if err := player.SavePlayer(p); err != nil {
-			return nil, fmt.Errorf("failed to save new player: %v", err)
-		}
-	} else if p.Weapon == nil { // Check if the player does not have a weapon equipped
-		// Load weapons
-		weapons, err := weapon.LoadWeapons("data/weapons.json")
-		if err != nil {
-			return nil, fmt.Errorf("failed to load weapons: %v", err)
-		}
-
-		// Randomly select a weapon for the player
-		source := rand.NewSource(time.Now().UnixNano())
-		random := rand.New(source)
-		randomIndex := random.Intn(len(weapons))
-
-		// Equip the randomly selected weapon to the player
-		if err := EquipWeapon(p, &weapons[randomIndex]); err != nil {
-			return nil, fmt.Errorf("failed to equip weapon: %v", err)
-		}
-
-		// Save the player data
-		if err := player.SavePlayer(p); err != nil {
-			return nil, fmt.Errorf("failed to save player: %v", err)
-		}
-	}
-
-	enemies, err := enemy.LoadEnemies("data/enemies.json")
-	if err != nil {
-		return nil, fmt.Errorf("failed to load enemies: %v", err)
-	}
-
-	return &Game{Player: p, Enemies: enemies}, nil
-}
-
-// StartGame initializes and starts the game.
-func StartGame(playerID string, weapons []weapon.Weapon) (*player.Player, error) {
-	p, err := player.LoadPlayer(playerID)
-	if err != nil || p == nil { // New player or failed to load existing player
-		charType := SelectCharacterType() // Let the user select a character type
-		p, err = player.NewPlayer(playerID, charType, 0, 0, 0)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create new player: %v", err)
 		}
@@ -105,6 +63,34 @@ func StartGame(playerID string, weapons []weapon.Weapon) (*player.Player, error)
 		if err := player.SavePlayer(p); err != nil {
 			return nil, fmt.Errorf("failed to save player: %v", err)
 		}
+	}
+
+	return p, nil
+}
+
+// NewGame creates a new game instance or loads an existing one.
+func NewGame(playerName string, charType player.CharacterType, weapons []weapon.Weapon) (*Game, error) {
+	// Initialize the player
+	p, err := InitializePlayer(playerName, weapons)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize player: %v", err)
+	}
+
+	// Load enemies
+	enemies, err := enemy.LoadEnemies("data/enemies.json")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load enemies: %v", err)
+	}
+
+	return &Game{Player: p, Enemies: enemies}, nil
+}
+
+// StartGame initializes and starts the game.
+func StartGame(playerName string, weapons []weapon.Weapon) (*player.Player, error) {
+	// Initialize the player
+	p, err := InitializePlayer(playerName, weapons)
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize player: %v", err)
 	}
 
 	return p, nil

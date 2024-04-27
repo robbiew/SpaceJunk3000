@@ -20,6 +20,7 @@
 # Go workspace file
 go.work
 
-
 data/u-*
-spacejunk3000
+data/door32.sys
+bin/*
+

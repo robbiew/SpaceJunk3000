@@ -49,17 +49,43 @@ type CrewDice struct {
 }
 
 // NewPlayer creates a new player instance with the provided attributes.
-func NewPlayer(name string, charType CharacterType, health int, timeLeft int, nodeNum int) (*Player, error) {
+func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, emulation int) (*Player, error) {
+	// Get character stats based on character type
+	stats, err := GetCharacterStats(charType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get character stats: %v", err)
+	}
+	dice, err := GetCrewDice(charType)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get crew dice: %v", err)
+	}
 
 	return &Player{
-		Name:     name,
-		Type:     charType,
-		Health:   health,
-		TimeLeft: timeLeft,
-		NodeNum:  nodeNum,
-		Alive:    true,
-		MaxSlots: 4, // Default value, can be modified if needed
+		Name:      name,
+		Type:      charType,
+		Health:    12,
+		Stats:     stats,
+		TimeLeft:  timeLeft,
+		NodeNum:   nodeNum,
+		CrewDice:  dice,
+		Emulation: emulation,
+		Alive:     true,
+		MaxSlots:  4, // Default value, can be modified if needed
 	}, nil
+}
+
+// GetCharacterStats returns the stats associated with the provided character type.
+func GetCharacterStats(charType CharacterType) (Stats, error) {
+	switch charType {
+	case Pirate:
+		return Stats{Might: 1, Cunning: 1, Wisdom: 1}, nil
+	case SpaceMarine:
+		return Stats{Might: 2, Cunning: 2, Wisdom: 2}, nil
+	case Empath:
+		return Stats{Might: 3, Cunning: 3, Wisdom: 3}, nil
+	default:
+		return Stats{}, fmt.Errorf("unsupported character type")
+	}
 }
 
 // getCrewDice returns the CrewDice associated with the provided character type.
