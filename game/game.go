@@ -7,6 +7,7 @@ import (
 	"os"
 	"spacejunk3000/enemy"
 	"spacejunk3000/player"
+	"spacejunk3000/weapon"
 	"strings"
 	"time"
 )
@@ -14,6 +15,7 @@ import (
 type Game struct {
 	Player  *player.Player
 	Enemies []enemy.Enemy
+	Weapons []weapon.Weapon
 }
 
 // NewGame creates a new game instance or loads an existing one.
@@ -45,9 +47,33 @@ func NewGame(playerName string, charType player.CharacterType) (*Game, error) {
 		}
 	}
 
-	return &Game{Player: p, Enemies: enemies}, nil
+	// Load weapons
+	weapons, err := weapon.LoadWeapons("data/weapons.json")
+	if err != nil {
+		return nil, fmt.Errorf("failed to load weapons: %v", err)
+	}
+
+	// Randomly select a weapon for the player
+	randomIndex := rand.Intn(len(weapons))
+	selectedWeapon := weapons[randomIndex]
+
+	// Assign the selected weapon to the player
+	p.Weapon = &selectedWeapon
+
+	// Save the updated player data
+	if err := player.SavePlayer(p); err != nil {
+		return nil, fmt.Errorf("failed to save player: %v", err)
+	}
+
+	// Save weapons
+	if err := weapon.SaveWeapons("data/weapons.json", weapons); err != nil {
+		return nil, fmt.Errorf("failed to save weapons: %v", err)
+	}
+
+	return &Game{Player: p, Enemies: enemies, Weapons: weapons}, nil
 }
 
+// StartGame initializes and starts the game.
 func StartGame(playerID string) (*player.Player, error) {
 	p, err := player.LoadPlayer(playerID)
 	if err != nil || p == nil { // New player or failed to load existing player
@@ -69,9 +95,10 @@ func StartGame(playerID string) (*player.Player, error) {
 	return p, nil
 }
 
+// Start begins the game.
 func (g *Game) Start() error {
 	fmt.Println("Game has started.")
-	fmt.Printf("Player %s has entered the game as a %s with %d health points.\n", g.Player.Name, g.Player.Type, g.Player.Health)
+	fmt.Printf("Player %s has entered the game as a %s with %d health points and equipped with %s.\n", g.Player.Name, g.Player.Type, g.Player.Health, g.Player.Weapon.Name)
 
 	if len(g.Enemies) == 0 {
 		return fmt.Errorf("no enemies available for an encounter")
@@ -95,6 +122,7 @@ func (g *Game) Start() error {
 	return nil
 }
 
+// UpdateHealth updates the player's health and handles death.
 func UpdateHealth(p *player.Player, delta int) {
 	p.Health += delta
 	if p.Health <= 0 {
@@ -106,6 +134,7 @@ func UpdateHealth(p *player.Player, delta int) {
 	player.SavePlayer(p) // Save any changes to player data
 }
 
+// SelectCharacterType prompts the user to select a character type.
 func SelectCharacterType() player.CharacterType {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Choose your character type:")

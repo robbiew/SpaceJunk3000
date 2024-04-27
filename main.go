@@ -34,11 +34,10 @@ func main() {
 
 		// Create a new player with default values and dropfile information
 		p = &player.Player{
-			Name:      playerName,
-			Type:      charType,
-			Health:    12,                                             // Using dropTimeLeft as health
-			Inventory: []player.ItemType{player.Sword, player.Shield}, // Initialize inventory here
-			Alive:     true,                                           // Set other necessary fields
+			Name:   playerName,
+			Type:   charType,
+			Health: 12,   // Using dropTimeLeft as health
+			Alive:  true, // Set other necessary fields
 			Stats: player.Stats{
 				Might:   4, // Using dropEmulation as Might
 				Cunning: 2,

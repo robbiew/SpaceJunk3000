@@ -4,19 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"spacejunk3000/weapon" // Import the weapon package
 )
 
 // Define the Player struct with exported Inventory field
 type Player struct {
-	Name      string        `json:"name"`      // Exported field
-	Type      CharacterType `json:"type"`      // Exported field
-	Health    int           `json:"health"`    // Exported field
-	Stats     Stats         `json:"stats"`     // Exported field
-	Inventory []ItemType    `json:"inventory"` // Exported field
-	Alive     bool          `json:"alive"`     // Unexported field
-	TimeLeft  int           `json:"-"`         // Unexported field
-	Emulation int           `json:"-"`         // Unexported field
-	NodeNum   int           `json:"-"`         // Unexported field
+	Name      string         `json:"name"`             // Exported field
+	Type      CharacterType  `json:"type"`             // Exported field
+	Health    int            `json:"health"`           // Exported field
+	Stats     Stats          `json:"stats"`            // Exported field
+	Alive     bool           `json:"alive"`            // Unexported field
+	TimeLeft  int            `json:"-"`                // Unexported field
+	Emulation int            `json:"-"`                // Unexported field
+	NodeNum   int            `json:"-"`                // Unexported field
+	Weapon    *weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
 }
 
 type CharacterType string
@@ -33,15 +34,6 @@ type Stats struct {
 	Wisdom  int `json:"wisdom"`
 }
 
-// Define ItemType as an exported type
-type ItemType string
-
-const (
-	Sword  ItemType = "Sword"
-	Shield ItemType = "Shield"
-	// Add more item types as needed
-)
-
 // NewPlayer initializes a new player with default values and handles potential errors.
 func NewPlayer(name string, charType CharacterType, dropTimeLeft, dropEmulation, nodeNum int) (*Player, error) {
 	if name == "" {
@@ -51,17 +43,17 @@ func NewPlayer(name string, charType CharacterType, dropTimeLeft, dropEmulation,
 	// if charType is not one of the predefined ones, return an error.
 
 	stats := Stats{Might: 1, Cunning: 2, Wisdom: 4}
-	inventory := []ItemType{Sword, Shield}
+
 	return &Player{
 		Name:      name,
 		Type:      charType,
 		Health:    12,
 		Stats:     stats,
-		Inventory: inventory,
 		Alive:     true,
 		TimeLeft:  dropTimeLeft,
 		Emulation: dropEmulation,
 		NodeNum:   nodeNum,
+		Weapon:    nil,
 	}, nil
 }
 
@@ -102,6 +94,7 @@ func LoadPlayer(name string) (*Player, error) {
 func ResetPlayer(p *Player) {
 	p.Health = 12
 	p.Alive = true
-	p.Inventory = []ItemType{} // Reset inventory to empty slice
+	p.Weapon = nil
+
 	// Additional reset logic as needed
 }
