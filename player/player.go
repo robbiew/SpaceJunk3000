@@ -9,19 +9,20 @@ import (
 
 // Define the Player struct with exported Inventory field
 type Player struct {
-	Name        string           `json:"name"`             // Exported field
-	Type        CharacterType    `json:"type"`             // Exported field
-	Health      int              `json:"health"`           // Exported field
-	Stats       Stats            `json:"stats"`            // Exported field
-	Alive       bool             `json:"alive"`            // Unexported field
-	TimeLeft    int              `json:"-"`                // Unexported field
-	Emulation   int              `json:"-"`                // Unexported field
-	NodeNum     int              `json:"-"`                // Unexported field
-	Weapons     []*weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
-	WeaponSlots int              `json:"weapon_slots"`     // Number of filled weapon slots
-	ItemSlots   int              `json:"item_slots"`       // Number of filled item slots
-	MaxSlots    int              `json:"max_slots"`        // Maximum number of total slots
-	CrewDice    CrewDice         `json:"crew_dice"`
+	Name         string           `json:"name"`   // Exported field
+	Type         CharacterType    `json:"type"`   // Exported field
+	Health       int              `json:"health"` // Exported field
+	HealthRecord []string         `json:"health_record"`
+	Stats        Stats            `json:"stats"`            // Exported field
+	Alive        bool             `json:"alive"`            // Unexported field
+	TimeLeft     int              `json:"-"`                // Unexported field
+	Emulation    int              `json:"-"`                // Unexported field
+	NodeNum      int              `json:"-"`                // Unexported field
+	Weapons      []*weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
+	WeaponSlots  int              `json:"weapon_slots"`     // Number of filled weapon slots
+	ItemSlots    int              `json:"item_slots"`       // Number of filled item slots
+	MaxSlots     int              `json:"max_slots"`        // Maximum number of total slots
+	CrewDice     CrewDice         `json:"crew_dice"`
 }
 
 type CharacterType string
@@ -59,19 +60,25 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 	if err != nil {
 		return nil, fmt.Errorf("failed to get crew dice: %v", err)
 	}
+	// Initialize the health record with all "-" for full health
+	healthRecord := make([]string, 12)
+	for i := range healthRecord {
+		healthRecord[i] = "-"
+	}
 
 	return &Player{
-		Name:      name,
-		Type:      charType,
-		Health:    12,
-		Stats:     stats,
-		TimeLeft:  timeLeft,
-		NodeNum:   nodeNum,
-		CrewDice:  dice,
-		Emulation: emulation,
-		Alive:     true,
-		MaxSlots:  4,                         // Default value, can be modified if needed
-		Weapons:   make([]*weapon.Weapon, 0), // Initialize the weapons slice
+		Name:         name,
+		Type:         charType,
+		Health:       12,
+		HealthRecord: healthRecord,
+		Stats:        stats,
+		TimeLeft:     timeLeft,
+		NodeNum:      nodeNum,
+		CrewDice:     dice,
+		Emulation:    emulation,
+		Alive:        true,
+		MaxSlots:     4,                         // Default value, can be modified if needed
+		Weapons:      make([]*weapon.Weapon, 0), // Initialize the weapons slice
 
 	}, nil
 }
@@ -190,4 +197,45 @@ func (p *Player) UnequipWeapon() {
 		p.Weapons = p.Weapons[:len(p.Weapons)-1]
 		p.WeaponSlots--
 	}
+}
+
+// AdjustHealth updates the player's health and modifies the health record.
+// Pass a positive number to heal, or a negative number to deal damage.
+func (p *Player) AdjustHealth(amount int) {
+	for i := 0; i < len(p.HealthRecord) && amount != 0; i++ {
+		if amount > 0 && p.HealthRecord[i] == "\\" {
+			p.HealthRecord[i] = "/"
+			amount--
+		} else if amount < 0 && p.HealthRecord[i] == "-" {
+			p.HealthRecord[i] = "\\"
+			amount++
+		}
+	}
+	// Update the actual Health value accordingly
+	p.Health += amount
+}
+
+// DisplayHealthRecord outputs the player's health record as a string.
+func (p *Player) DisplayHealthRecord() string {
+	// Top part of the medical record
+	record := "\r\n┌──────────────────────────────┐\n│ MEDICAL RECORD               │\n"
+
+	// Adding the health points with appropriate symbols
+	for i := 12; i > 0; i-- {
+		line := fmt.Sprintf("│ %2d │ ", i)
+		for j := 0; j < 12; j++ {
+			if j < p.Health {
+				// Check the HealthRecord for visual representation of health points
+				line += p.HealthRecord[j] + " "
+			} else {
+				line += "  " // Empty space for lost health points
+			}
+		}
+		record += line + "│\n"
+	}
+
+	// Bottom part of the medical record
+	record += "└──────────────────────────────┘"
+
+	return record
 }

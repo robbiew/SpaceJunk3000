@@ -215,35 +215,41 @@ func PresentCombatOptions(g *Game) {
 
 // Function to handle user's combat choice.
 func HandleCombatChoice(g *Game) {
-	fmt.Println("\r\nChoose your action:")
+	for {
+		fmt.Println("\r\nChoose your action:")
 
-	char, _, err := keyboard.GetSingleKey()
-	if err != nil {
-		fmt.Println("Error reading keyboard input:", err)
-		return
-	}
+		char, _, err := keyboard.GetSingleKey()
+		if err != nil {
+			fmt.Println("Error reading keyboard input:", err)
+			continue // Continue to loop for valid input
+		}
 
-	switch char {
-	case ('F' | 'f'):
-		// Hand to hand combat logic
-		fmt.Println("You chose hand to hand combat.")
-	case ('Q' | 'q'):
-		// Run away logic
-		fmt.Println("You chose to run away.")
-	case ('D' | 'd'):
-		// Defend logic
-		fmt.Println("You chose to defend.")
-	case ('R' | 'r'):
-		// Reload logic
-		fmt.Println("You chose to reload.")
-	case ('U' | 'u'):
-		// Use item or tech implant logic
-		fmt.Println("You chose to use an item or a tech implant.")
-	case ('S' | 's'):
-		// Ranged combat logic
-		fmt.Println("You chose to shoot.")
-	default:
-		fmt.Println("Invalid choice.")
+		switch char {
+		case ('F' | 'f'):
+			// Hand to hand combat logic
+			fmt.Println("You chose hand to hand combat.")
+		case ('Q' | 'q'):
+			// Run away logic
+			fmt.Println("You chose to run away.")
+		case ('D' | 'd'):
+			// Defend logic
+			fmt.Println("You chose to defend.")
+		case ('R' | 'r'):
+			// Reload logic
+			fmt.Println("You chose to reload.")
+		case ('U' | 'u'):
+			// Use item or tech implant logic
+			fmt.Println("You chose to use an item or a tech implant.")
+		case ('S' | 's'):
+			// Ranged combat logic
+			fmt.Println("You chose to shoot.")
+		default:
+			fmt.Println("Invalid choice. Please select a valid option.")
+			continue // Continue to loop for valid input
+		}
+
+		// If a valid choice is made, break out of the loop
+		break
 	}
 }
 
@@ -253,6 +259,9 @@ func HandleEncounter(g *Game) {
 	// Print player information
 	fmt.Printf("Player Name: %s\n", g.Player.Name)
 	fmt.Printf("Health: %d\n", g.Player.Health)
+
+	// Display the health record using the DisplayHealthRecord method
+	fmt.Printf("%s", g.Player.DisplayHealthRecord())
 
 	// Show available weapons and their ammo
 	fmt.Println("\r\nEquipped Weapons:")
