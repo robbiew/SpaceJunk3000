@@ -134,7 +134,7 @@ func SavePlayer(p *Player) error {
 	}
 
 	// Print out the serialized player data for debugging
-	fmt.Println("Serialized player data:", string(data))
+	// fmt.Println("Serialized player data:", string(data))
 
 	// Filename based on player name, which is the unique ID
 	filename := fmt.Sprintf("data/u-%s.json", p.Name)

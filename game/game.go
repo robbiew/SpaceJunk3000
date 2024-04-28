@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"math/rand"
+	"spacejunk3000/doorutil"
 	"spacejunk3000/enemy"
 	"spacejunk3000/item"
 	"spacejunk3000/location"
@@ -166,7 +167,7 @@ func EquipWeapon(p *player.Player, w *weapon.Weapon) error {
 	}
 
 	// Equip the weapon to the player
-	p.Weapons = []*weapon.Weapon{w} // Change the type of p.Weapon to []*weapon.Weapon
+	p.Weapons = []*weapon.Weapon{w}
 	p.WeaponSlots += w.Slots
 
 	return nil
@@ -193,47 +194,82 @@ func UnequipItem(p *player.Player) {
 
 // Function to present the user with combat options.
 func PresentCombatOptions(g *Game) {
-	fmt.Println("Encounter!")
-	fmt.Printf("You've encountered an enemy at %s: %s\n", g.Location.Name, g.CurrentEnemy.Name)
-	fmt.Println("Choose your action:")
-	fmt.Println("1. Ranged combat")
-	fmt.Println("2. Hand to hand combat")
-	fmt.Println("3. Run away")
-	fmt.Println("4. Defend")
-	fmt.Println("5. Reload (if weapons are out of ammo)")
-	fmt.Println("6. Use an item or a tech implant (if you have any)")
+	fmt.Println("\r\nEncounter!")
+	fmt.Printf("You've encountered an enemy at %s: %s\r\n", g.Location.Name, g.CurrentEnemy.Name)
+	fmt.Println("\r\nChoose your action:")
+
+	fmt.Println("[Q] Quit - run away, lose health, items)")
+	fmt.Println("[D] Defend")
+	fmt.Println("[U] Use an item or a tech implant (if you have any)")
+	fmt.Println("[F] Fight - hand to hand")
+
+	// Check if the player has a ranged weapon
+	for _, w := range g.Player.Weapons {
+		if w.Type == "Ranged Weapon" {
+			fmt.Println("[S] Shoot - Ranged Weapon")
+			fmt.Println("[R] Reload - if weapons are out of ammo")
+			break
+		}
+	}
 }
 
 // Function to handle user's combat choice.
-func HandleCombatChoice(g *Game, choice int) {
-	switch choice {
-	case 1:
-		// Ranged combat logic
-	case 2:
+func HandleCombatChoice(g *Game) {
+	fmt.Println("\r\nChoose your action:")
+
+	char, _, err := keyboard.GetSingleKey()
+	if err != nil {
+		fmt.Println("Error reading keyboard input:", err)
+		return
+	}
+
+	switch char {
+	case ('F' | 'f'):
 		// Hand to hand combat logic
-	case 3:
+		fmt.Println("You chose hand to hand combat.")
+	case ('Q' | 'q'):
 		// Run away logic
-	case 4:
+		fmt.Println("You chose to run away.")
+	case ('D' | 'd'):
 		// Defend logic
-	case 5:
+		fmt.Println("You chose to defend.")
+	case ('R' | 'r'):
 		// Reload logic
-	case 6:
+		fmt.Println("You chose to reload.")
+	case ('U' | 'u'):
 		// Use item or tech implant logic
+		fmt.Println("You chose to use an item or a tech implant.")
+	case ('S' | 's'):
+		// Ranged combat logic
+		fmt.Println("You chose to shoot.")
 	default:
-		fmt.Println("Invalid choice. Please select a valid option.")
+		fmt.Println("Invalid choice.")
 	}
 }
 
 // Function to handle an encounter.
 func HandleEncounter(g *Game) {
+	doorutil.ClearScreen()
+	// Print player information
+	fmt.Printf("Player Name: %s\n", g.Player.Name)
+	fmt.Printf("Health: %d\n", g.Player.Health)
+
+	// Show available weapons and their ammo
+	fmt.Println("\r\nEquipped Weapons:")
+	for _, w := range g.Player.Weapons {
+		// Check if the weapon is of type "Ranged"
+		if w.Type == "Ranged Weapon" {
+			fmt.Printf("- %s (Ammo: %d)\r\n", w.Name, w.Ammo)
+		} else {
+			fmt.Printf("- %s\r\n", w.Name)
+		}
+	}
+
 	// Present combat options
 	PresentCombatOptions(g)
 
-	// Get user choice
-	choice := GetUserChoice(g)
-
 	// Handle user choice
-	HandleCombatChoice(g, choice)
+	HandleCombatChoice(g)
 }
 
 // Function to get user's choice.

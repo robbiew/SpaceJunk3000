@@ -14,6 +14,7 @@ type Weapon struct {
 	FireRate     string `json:"fire_rate,omitempty"`
 	Jammed       bool   `json:"jammed,omitempty"`
 	Slots        int    `json:"slots"`
+	Ammo         int    `json:"ammo,omitempty"`
 }
 
 // NewWeapon creates a new weapon with the given attributes.
