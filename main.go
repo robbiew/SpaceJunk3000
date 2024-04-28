@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"spacejunk3000/doorutil"
+	"spacejunk3000/enemy"
 	"spacejunk3000/game"
+	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
 )
@@ -45,14 +47,26 @@ func main() {
 		}
 	}
 
-	// Load weapons
+	// Load locations from JSON file
+	locations, err := location.LoadLocations("data/locations.json")
+	if err != nil {
+		log.Fatalf("Failed to load locations: %v", err)
+	}
+
+	// Load enemies from JSON file
+	enemies, err := enemy.LoadEnemies("data/enemies.json")
+	if err != nil {
+		log.Fatalf("Failed to load enemies: %v", err)
+	}
+
+	// Load weapons from JSON file
 	weapons, err := weapon.LoadWeapons("data/weapons.json")
 	if err != nil {
 		log.Fatalf("Failed to load weapons: %v", err)
 	}
 
-	// Initialize and start the game
-	g, err := game.NewGame(playerName, p.Type, weapons)
+	// Initialize and start the game with all required arguments
+	g, err := game.NewGame(playerName, p.Type, weapons, locations, enemies)
 	if err != nil {
 		log.Fatalf("Failed to initialize game: %v", err)
 	}
@@ -74,4 +88,6 @@ func main() {
 	} else {
 		fmt.Println(" and is unarmed.")
 	}
+	// Start the encounter
+	game.HandleEncounter(g)
 }

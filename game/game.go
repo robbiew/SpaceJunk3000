@@ -1,22 +1,25 @@
 package game
 
 import (
-	"bufio"
 	"fmt"
 	"math/rand"
-	"os"
 	"spacejunk3000/enemy"
 	"spacejunk3000/item"
+	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
-	"strings"
+	"strconv"
 	"time"
+
+	"github.com/eiannone/keyboard"
 )
 
 type Game struct {
-	Player  *player.Player
-	Enemies []enemy.Enemy
-	Weapons []weapon.Weapon
+	Player       *player.Player
+	Enemies      []enemy.Enemy
+	Weapons      []weapon.Weapon
+	Location     location.Location
+	CurrentEnemy enemy.Enemy
 }
 
 // InitializePlayer initializes a player by loading an existing one or creating a new one.
@@ -68,21 +71,31 @@ func InitializePlayer(playerName string, weapons []weapon.Weapon) (*player.Playe
 	return p, nil
 }
 
-// NewGame creates a new game instance or loads an existing one.
-func NewGame(playerName string, charType player.CharacterType, weapons []weapon.Weapon) (*Game, error) {
+func NewGame(playerName string, charType player.CharacterType, weapons []weapon.Weapon, locations []location.Location, enemies []enemy.Enemy) (*Game, error) {
 	// Initialize the player
 	p, err := InitializePlayer(playerName, weapons)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize player: %v", err)
 	}
 
-	// Load enemies
-	enemies, err := enemy.LoadEnemies("data/enemies.json")
-	if err != nil {
-		return nil, fmt.Errorf("failed to load enemies: %v", err)
+	// Randomly select a location and enemy
+	source := rand.NewSource(time.Now().UnixNano())
+	random := rand.New(source)
+	randomLocationIndex := random.Intn(len(locations))
+	randomEnemyIndex := random.Intn(len(enemies))
+	selectedLocation := locations[randomLocationIndex]
+	selectedEnemy := enemies[randomEnemyIndex]
+
+	// Create the Game instance
+	game := &Game{
+		Player:       p,
+		Enemies:      enemies,
+		Weapons:      weapons,
+		Location:     selectedLocation,
+		CurrentEnemy: selectedEnemy,
 	}
 
-	return &Game{Player: p, Enemies: enemies}, nil
+	return game, nil
 }
 
 // StartGame initializes and starts the game.
@@ -110,27 +123,34 @@ func UpdateHealth(p *player.Player, delta int) {
 
 // SelectCharacterType prompts the user to select a character type.
 func SelectCharacterType() player.CharacterType {
-	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Choose your character type:")
 	fmt.Println("1. Pirate")
 	fmt.Println("2. Space Marine")
 	fmt.Println("3. Empath")
 
 	for {
-		fmt.Print("Enter choice (1-3): ")
-		input, err := reader.ReadString('\n')
+		// Initialize keyboard listener
+		err := keyboard.Open()
 		if err != nil {
-			fmt.Println("Invalid input, please try again.")
+			fmt.Println("Error opening keyboard:", err)
+			return ""
+		}
+		defer keyboard.Close()
+
+		// Listen for single key press
+		char, _, err := keyboard.GetSingleKey()
+		if err != nil {
+			fmt.Println("Error reading keyboard input:", err)
 			continue
 		}
-		input = strings.TrimSpace(input)
 
-		switch input {
-		case "1", "Pirate":
+		// Convert the pressed key to character type
+		switch char {
+		case '1':
 			return player.Pirate
-		case "2", "Space Marine":
+		case '2':
 			return player.SpaceMarine
-		case "3", "Empath":
+		case '3':
 			return player.Empath
 		default:
 			fmt.Println("Invalid choice, please select a valid character type.")
@@ -169,4 +189,76 @@ func EquipItem(p *player.Player, i *item.Item) error {
 // UnequipItem unequips an item from the player.
 func UnequipItem(p *player.Player) {
 	// Implement logic to unequip an item similar to UnequipWeapon
+}
+
+// Function to present the user with combat options.
+func PresentCombatOptions(g *Game) {
+	fmt.Println("Encounter!")
+	fmt.Printf("You've encountered an enemy at %s: %s\n", g.Location.Name, g.CurrentEnemy.Name)
+	fmt.Println("Choose your action:")
+	fmt.Println("1. Ranged combat")
+	fmt.Println("2. Hand to hand combat")
+	fmt.Println("3. Run away")
+	fmt.Println("4. Defend")
+	fmt.Println("5. Reload (if weapons are out of ammo)")
+	fmt.Println("6. Use an item or a tech implant (if you have any)")
+}
+
+// Function to handle user's combat choice.
+func HandleCombatChoice(g *Game, choice int) {
+	switch choice {
+	case 1:
+		// Ranged combat logic
+	case 2:
+		// Hand to hand combat logic
+	case 3:
+		// Run away logic
+	case 4:
+		// Defend logic
+	case 5:
+		// Reload logic
+	case 6:
+		// Use item or tech implant logic
+	default:
+		fmt.Println("Invalid choice. Please select a valid option.")
+	}
+}
+
+// Function to handle an encounter.
+func HandleEncounter(g *Game) {
+	// Present combat options
+	PresentCombatOptions(g)
+
+	// Get user choice
+	choice := GetUserChoice(g)
+
+	// Handle user choice
+	HandleCombatChoice(g, choice)
+}
+
+// Function to get user's choice.
+func GetUserChoice(g *Game) int {
+	// Initialize keyboard listener
+	err := keyboard.Open()
+	if err != nil {
+		panic(err)
+	}
+	defer keyboard.Close()
+
+	// Loop until a valid choice is made
+	for {
+		char, _, err := keyboard.GetSingleKey()
+		if err != nil {
+			panic(err)
+		}
+
+		// Convert the pressed key to integer if possible
+		choice, err := strconv.Atoi(string(char))
+		if err == nil && choice >= 1 && choice <= 6 {
+			return choice // Return valid choice
+		}
+
+		fmt.Println("Invalid choice. Please select a valid option.")
+		PresentCombatOptions(g) // Present combat options again
+	}
 }

@@ -72,6 +72,7 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 		Alive:     true,
 		MaxSlots:  4,                         // Default value, can be modified if needed
 		Weapons:   make([]*weapon.Weapon, 0), // Initialize the weapons slice
+
 	}, nil
 }
 
