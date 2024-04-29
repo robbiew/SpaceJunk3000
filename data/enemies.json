@@ -1,17 +1,34 @@
 [
     {
-        "name": "Space Goblin",
+        "name": "Patroling Guards",
         "health": 10,
-        "damage": 3
+        "damage": 3,
+        "desc": "You hurry round a bulkhead and collide with a pair of patrolling guards. They immediately open fire!",
+		"toHitMight": 2, 
+		"toHitCunni": 1,
+		"toHitWison": 0,
+		"enemyBallDamage": 2,
+		"enemyEnerDamage": 1,
+		"enemyExplDamage": 2,
+		"playerRangedDamage": 1,
+		"playerCloseDamage": 2,
+		"itemDrop": 2,
+        "initiative": true
     },
     {
-        "name": "Asteroid Worm",
+        "name": "Security Drone",
         "health": 15,
-        "damage": 5
-    },
-    {
-        "name": "Nebula Dragon",
-        "health": 20,
-        "damage": 8
+        "damage": 4,
+        "desc": "A security drone hovers into view, its weapons tracking you.",
+        "toHitMight": 1,
+        "toHitCunni": 2,
+        "toHitWison": 0,
+        "enemyBallDamage": 3,
+        "enemyEnerDamage": 2,
+        "enemyExplDamage": 1,
+        "playerRangedDamage": 2,
+        "playerCloseDamage": 1,
+        "itemDrop": 1,
+        "initiative": false
     }
 ]

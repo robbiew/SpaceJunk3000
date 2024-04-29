@@ -16,11 +16,12 @@ import (
 )
 
 type Game struct {
-	Player       *player.Player
-	Enemies      []enemy.Enemy
-	Weapons      []weapon.Weapon
-	Location     location.Location
-	CurrentEnemy enemy.Enemy
+	Player          *player.Player
+	Enemies         []enemy.Enemy
+	Weapons         []weapon.Weapon
+	Location        location.Location
+	CurrentEnemy    enemy.Enemy
+	UsedHealthDrone bool // whether the health drone has been used in the current encounter
 }
 
 // InitializePlayer initializes a player by loading an existing one or creating a new one.
@@ -201,13 +202,18 @@ func PresentCombatOptions(g *Game) {
 	fmt.Println("[Q] Quit - run away, lose health, items)")
 	fmt.Println("[D] Defend")
 	fmt.Println("[U] Use an item or a tech implant (if you have any)")
+	if !g.UsedHealthDrone {
+		fmt.Println("[H] Activate Health Drone - heal (once per day)")
+	} else {
+		fmt.Println("[-] Health Drone is unavailable")
+	}
 	fmt.Println("[F] Fight - hand to hand")
 
 	// Check if the player has a ranged weapon
 	for _, w := range g.Player.Weapons {
 		if w.Type == "Ranged Weapon" {
 			fmt.Println("[S] Shoot - Ranged Weapon")
-			fmt.Println("[R] Reload - if weapons are out of ammo")
+			fmt.Println("[R] Reload - Ranged Weapon")
 			break
 		}
 	}
@@ -240,6 +246,15 @@ func HandleCombatChoice(g *Game) {
 		case ('U' | 'u'):
 			// Use item or tech implant logic
 			fmt.Println("You chose to use an item or a tech implant.")
+		case 'H', 'h':
+			if !g.UsedHealthDrone {
+				// Activate Health Drone logic here
+				fmt.Println("Activating Health Drone.")
+				// Update player health here
+				g.UsedHealthDrone = true // Mark the drone as used
+			} else {
+				fmt.Println("Health Drone is unavailable.")
+			}
 		case ('S' | 's'):
 			// Ranged combat logic
 			fmt.Println("You chose to shoot.")
@@ -247,15 +262,27 @@ func HandleCombatChoice(g *Game) {
 			fmt.Println("Invalid choice. Please select a valid option.")
 			continue // Continue to loop for valid input
 		}
-
-		// If a valid choice is made, break out of the loop
-		break
+		// Break out of the loop if a valid choice is made
+		if g.UsedHealthDrone || char == 'F' || char == 'f' || char == 'Q' || char == 'q' || char == 'D' || char == 'd' || char == 'R' || char == 'r' || char == 'U' || char == 'u' || char == 'S' || char == 's' {
+			break
+		} else {
+			fmt.Println("Invalid choice. Please select a valid option.")
+		}
 	}
+}
+
+// At the start of each new encounter, you need to reset the UsedHealthDrone field
+func StartNewEncounter(g *Game) {
+	// Reset the health drone availability for the new encounter
+	g.UsedHealthDrone = true
+	// Continue with encounter setup...
+	HandleEncounter(g)
 }
 
 // Function to handle an encounter.
 func HandleEncounter(g *Game) {
 	doorutil.ClearScreen()
+
 	// Print player information
 	fmt.Printf("Player Name: %s\n", g.Player.Name)
 	fmt.Printf("Health: %d\n", g.Player.Health)

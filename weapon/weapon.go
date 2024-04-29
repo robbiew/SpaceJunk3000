@@ -18,8 +18,17 @@ type Weapon struct {
 }
 
 // NewWeapon creates a new weapon with the given attributes.
-func NewWeapon(name, weaponType string, ammoType string, ammoCapacity int, fireRate string, jammed bool, slots int) *Weapon {
-	return &Weapon{Name: name, Type: weaponType, AmmoType: ammoType, AmmoCapacity: ammoCapacity, FireRate: fireRate, Jammed: jammed, Slots: slots}
+func NewWeapon(name, weaponType, ammoType string, ammoCapacity int, fireRate string, jammed bool, slots, ammo int) *Weapon {
+	return &Weapon{
+		Name:         name,
+		Type:         weaponType,
+		AmmoType:     ammoType,
+		AmmoCapacity: ammoCapacity,
+		FireRate:     fireRate,
+		Jammed:       jammed,
+		Slots:        slots,
+		Ammo:         ammo,
+	}
 }
 
 // LoadWeapons loads weapons from a specified JSON file.

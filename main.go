@@ -74,5 +74,5 @@ func main() {
 	}
 
 	// Start the encounter
-	game.HandleEncounter(g)
+	game.StartNewEncounter(g)
 }
