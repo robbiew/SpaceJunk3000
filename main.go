@@ -7,6 +7,7 @@ import (
 	"spacejunk3000/doorutil"
 	"spacejunk3000/enemy"
 	"spacejunk3000/game"
+	"spacejunk3000/implant"
 	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
@@ -35,13 +36,26 @@ func main() {
 	if err != nil {
 		fmt.Printf("Welcome, %s!\r\n", playerName)
 
+		// Select character type
 		charType := game.SelectCharacterType()
 
-		// Create a new player with default values and dropfile information
+		// Load implants from JSON file
+		implants, err := implant.LoadImplants("data/implants.json")
+		if err != nil {
+			log.Fatalf("Failed to load implants: %v", err)
+		}
+
+		// Select implant
+		selectedImplant := implant.SelectImplant(implants)
+
+		// Create a new player with default values, dropfile information, character type, and selected implant
 		p, err = player.NewPlayer(playerName, charType, dropTimeLeft, nodeNum, dropEmulation)
 		if err != nil {
 			log.Fatalf("Failed to create new player: %v", err)
 		}
+
+		// Set the selected implant for the player
+		p.Implant = selectedImplant
 
 		// Save the new player
 		if err := player.SavePlayer(p); err != nil {
@@ -67,8 +81,14 @@ func main() {
 		log.Fatalf("Failed to load weapons: %v", err)
 	}
 
+	// Load implants from JSON file
+	implants, err := implant.LoadImplants("data/implants.json")
+	if err != nil {
+		log.Fatalf("Failed to load implants: %v", err)
+	}
+
 	// Initialize and start the game with all required arguments
-	g, err := game.NewGame(playerName, p.Type, weapons, locations, enemies)
+	g, err := game.NewGame(playerName, p.Type, weapons, implants, locations, enemies)
 	if err != nil {
 		log.Fatalf("Failed to initialize game: %v", err)
 	}

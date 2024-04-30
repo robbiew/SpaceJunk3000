@@ -14,7 +14,7 @@ go build .
 mv spacejunk3000 bin/
 
 # Delete test user file
-rm data/u-aLPHA.json
+rm data/u-*.json
 
 echo "Build completed successfully!"
 echo "Executable is located in bin/ directory"

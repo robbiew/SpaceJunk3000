@@ -56,12 +56,3 @@ func LoadEnemies(filename string) ([]Enemy, error) {
 	}
 	return enemies, nil
 }
-
-// SaveEnemies saves a slice of enemies to a specified JSON file.
-func SaveEnemies(filename string, enemies []Enemy) error {
-	bytes, err := json.Marshal(enemies)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filename, bytes, os.ModePerm)
-}

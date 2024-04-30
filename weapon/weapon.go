@@ -45,11 +45,7 @@ func LoadWeapons(filename string) ([]Weapon, error) {
 	return weapons, nil
 }
 
-// SaveWeapons saves a slice of weapons to a specified JSON file.
-func SaveWeapons(filename string, weapons []Weapon) error {
-	bytes, err := json.Marshal(weapons)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(filename, bytes, os.ModePerm)
+// ReloadWeapon reloads the weapon with the given ammo.
+func (w *Weapon) ReloadWeapon(ammo int) {
+	w.Ammo = ammo
 }

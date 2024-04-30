@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Advanced Targetting",
+        "description": "Take another shot in Ranged Combat."
+    },
+    {
+        "name": "Combat Protocol",
+        "description": "Strike another hit in Close Combat"
+    }
+]

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"spacejunk3000/implant"
 	"spacejunk3000/weapon"
 )
 
@@ -23,6 +24,7 @@ type Player struct {
 	ItemSlots    int              `json:"item_slots"`       // Number of filled item slots
 	MaxSlots     int              `json:"max_slots"`        // Maximum number of total slots
 	CrewDice     CrewDice         `json:"crew_dice"`
+	Implant      implant.Implant  `json:"implant"` // Include a field for the implants
 }
 
 type CharacterType string
@@ -79,7 +81,7 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 		Alive:        true,
 		MaxSlots:     4,                         // Default value, can be modified if needed
 		Weapons:      make([]*weapon.Weapon, 0), // Initialize the weapons slice
-
+		Implant:      implant.Implant{},         // Initialize the implant
 	}, nil
 }
 

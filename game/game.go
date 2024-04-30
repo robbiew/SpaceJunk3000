@@ -5,7 +5,9 @@ import (
 	"math/rand"
 	"spacejunk3000/doorutil"
 	"spacejunk3000/enemy"
+	"spacejunk3000/implant"
 	"spacejunk3000/item"
+
 	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
@@ -22,18 +24,25 @@ type Game struct {
 	Location        location.Location
 	CurrentEnemy    enemy.Enemy
 	UsedHealthDrone bool // whether the health drone has been used in the current encounter
+	Implants        []implant.Implant
 }
 
-// InitializePlayer initializes a player by loading an existing one or creating a new one.
-func InitializePlayer(playerName string, weapons []weapon.Weapon) (*player.Player, error) {
+// InitializePlayer initializes a player by loading an existing one or creating a new one if not found.
+func InitializePlayer(playerName string, weapons []weapon.Weapon, implants []implant.Implant) (*player.Player, error) {
 	// Load existing player or create a new one if not found
 	p, err := player.LoadPlayer(playerName)
 	if err != nil || p == nil {
-		charType := SelectCharacterType() // Let the user select a character type if creating a new player
+		charType := SelectCharacterType()                  // Let the user select a character type if creating a new player
+		selectedImplant := implant.SelectImplant(implants) // Select an implant
+
+		// Initialize the player with default values and selected implant
 		p, err = player.NewPlayer(playerName, charType, 0, 0, 0)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create new player: %v", err)
 		}
+
+		// Set the selected implant for the player
+		p.Implant = selectedImplant
 
 		// Randomly select a weapon for the player
 		source := rand.NewSource(time.Now().UnixNano())
@@ -73,9 +82,9 @@ func InitializePlayer(playerName string, weapons []weapon.Weapon) (*player.Playe
 	return p, nil
 }
 
-func NewGame(playerName string, charType player.CharacterType, weapons []weapon.Weapon, locations []location.Location, enemies []enemy.Enemy) (*Game, error) {
+func NewGame(playerName string, charType player.CharacterType, weapons []weapon.Weapon, implants []implant.Implant, locations []location.Location, enemies []enemy.Enemy) (*Game, error) {
 	// Initialize the player
-	p, err := InitializePlayer(playerName, weapons)
+	p, err := InitializePlayer(playerName, weapons, implants)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize player: %v", err)
 	}
@@ -101,9 +110,9 @@ func NewGame(playerName string, charType player.CharacterType, weapons []weapon.
 }
 
 // StartGame initializes and starts the game.
-func StartGame(playerName string, weapons []weapon.Weapon) (*player.Player, error) {
+func StartGame(playerName string, weapons []weapon.Weapon, implants []implant.Implant) (*player.Player, error) {
 	// Initialize the player
-	p, err := InitializePlayer(playerName, weapons)
+	p, err := InitializePlayer(playerName, weapons, implants)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize player: %v", err)
 	}
@@ -125,6 +134,7 @@ func UpdateHealth(p *player.Player, delta int) {
 
 // SelectCharacterType prompts the user to select a character type.
 func SelectCharacterType() player.CharacterType {
+
 	fmt.Println("Choose your character type:")
 	fmt.Println("1. Pirate")
 	fmt.Println("2. Space Marine")
@@ -219,7 +229,7 @@ func PresentCombatOptions(g *Game) {
 	}
 }
 
-// Function to handle user's combat choice.
+// HandleCombatChoice handles user's combat choice including selecting an implant if needed.
 func HandleCombatChoice(g *Game) {
 	for {
 		fmt.Println("\r\nChoose your action:")
@@ -231,21 +241,29 @@ func HandleCombatChoice(g *Game) {
 		}
 
 		switch char {
-		case ('F' | 'f'):
+		case 'F', 'f':
 			// Hand to hand combat logic
 			fmt.Println("You chose hand to hand combat.")
-		case ('Q' | 'q'):
+		case 'Q', 'q':
 			// Run away logic
 			fmt.Println("You chose to run away.")
-		case ('D' | 'd'):
+		case 'D', 'd':
 			// Defend logic
 			fmt.Println("You chose to defend.")
-		case ('R' | 'r'):
+		case 'R', 'r':
 			// Reload logic
 			fmt.Println("You chose to reload.")
-		case ('U' | 'u'):
+		case 'U', 'u':
 			// Use item or tech implant logic
 			fmt.Println("You chose to use an item or a tech implant.")
+			// Check if the player has an implant
+			if g.Player.Implant.Name != "" {
+				// If the player has an implant, perform actions with it
+				fmt.Printf("You selected %s implant.\n", g.Player.Implant.Name)
+				// Perform actions with the selected implant if needed
+			} else {
+				fmt.Println("You don't have any implants.")
+			}
 		case 'H', 'h':
 			if !g.UsedHealthDrone {
 				// Activate Health Drone logic here
@@ -255,7 +273,7 @@ func HandleCombatChoice(g *Game) {
 			} else {
 				fmt.Println("Health Drone is unavailable.")
 			}
-		case ('S' | 's'):
+		case 'S', 's':
 			// Ranged combat logic
 			fmt.Println("You chose to shoot.")
 		default:
