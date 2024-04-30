@@ -6,7 +6,6 @@ import (
 	"spacejunk3000/doorutil"
 	"spacejunk3000/enemy"
 	"spacejunk3000/implant"
-	"spacejunk3000/item"
 
 	"spacejunk3000/location"
 	"spacejunk3000/player"
@@ -50,7 +49,7 @@ func InitializePlayer(playerName string, weapons []weapon.Weapon, implants []imp
 		randomIndex := random.Intn(len(weapons))
 
 		// Equip the randomly selected weapon to the player
-		if err := EquipWeapon(p, &weapons[randomIndex]); err != nil {
+		if err := p.EquipWeapon(&weapons[randomIndex]); err != nil {
 			return nil, fmt.Errorf("failed to equip weapon: %v", err)
 		}
 
@@ -69,7 +68,7 @@ func InitializePlayer(playerName string, weapons []weapon.Weapon, implants []imp
 		randomIndex := random.Intn(len(weapons))
 
 		// Equip the randomly selected weapon to the player
-		if err := EquipWeapon(p, &weapons[randomIndex]); err != nil {
+		if err := p.EquipWeapon(&weapons[randomIndex]); err != nil {
 			return nil, fmt.Errorf("failed to equip weapon: %v", err)
 		}
 
@@ -168,39 +167,6 @@ func SelectCharacterType() player.CharacterType {
 			fmt.Println("Invalid choice, please select a valid character type.")
 		}
 	}
-}
-
-// EquipWeapon equips a weapon to the player if there are available slots.
-func EquipWeapon(p *player.Player, w *weapon.Weapon) error {
-	// Check if there are enough weapon slots to equip the weapon
-	if p.WeaponSlots+w.Slots > p.MaxSlots {
-		return fmt.Errorf("cannot carry that much")
-	}
-
-	// Equip the weapon to the player
-	p.Weapons = []*weapon.Weapon{w}
-	p.WeaponSlots += w.Slots
-
-	return nil
-}
-
-// UnequipWeapon unequips the player's weapon.
-func UnequipWeapon(p *player.Player) {
-	if p.Weapons != nil {
-		p.Weapons = nil
-		p.WeaponSlots--
-	}
-}
-
-// EquipItem equips an item to the player if there are available slots.
-func EquipItem(p *player.Player, i *item.Item) error {
-	// Implement logic to equip an item similar to EquipWeapon
-	return nil
-}
-
-// UnequipItem unequips an item from the player.
-func UnequipItem(p *player.Player) {
-	// Implement logic to unequip an item similar to UnequipWeapon
 }
 
 // Function to present the user with combat options.
