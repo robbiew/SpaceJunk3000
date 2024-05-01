@@ -2,7 +2,6 @@ package enemy
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"os"
 	"spacejunk3000/gear"
@@ -66,29 +65,28 @@ func (e *Enemy) DropItems() ([]interface{}, error) {
 	items := make([]interface{}, 0)
 
 	// Determine the number of items to drop based on ItemDrop field
-	fmt.Println("Dropping", e.ItemDrop, "items...") // Debug print
 	for i := 0; i < e.ItemDrop; i++ {
 		// Randomly choose between dropping a weapon or gear
 		if rand.Intn(2) == 0 {
-			// Drop a weapon
+			// Enemy drops a weapon
 			weapons, err := weapon.LoadWeapons("data/weapons.json")
 			if err != nil {
 				return nil, err
 			}
 			if len(weapons) > 0 {
 				randomIndex := rand.Intn(len(weapons))
-				fmt.Println("Adding weapon:", weapons[randomIndex].Name) // Debug print
+				// fmt.Println("Adding weapon:", weapons[randomIndex].Name) // Debug print
 				items = append(items, weapons[randomIndex])
 			}
 		} else {
-			// Drop gear
+			// Enemy drops gear
 			gears, err := gear.LoadGear("data/gear.json")
 			if err != nil {
 				return nil, err
 			}
 			if len(gears) > 0 {
 				randomIndex := rand.Intn(len(gears))
-				fmt.Println("Adding gear:", gears[randomIndex].Name) // Debug print
+				// fmt.Println("Adding gear:", gears[randomIndex].Name) // Debug print
 				items = append(items, gears[randomIndex])
 			}
 		}

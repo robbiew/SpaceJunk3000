@@ -2,6 +2,7 @@ package weapon
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -48,4 +49,8 @@ func LoadWeapons(filename string) ([]Weapon, error) {
 // ReloadWeapon reloads the weapon with the given ammo.
 func (w *Weapon) ReloadWeapon(ammo int) {
 	w.Ammo = ammo
+}
+
+func (w *Weapon) String() string {
+	return fmt.Sprintf("Weapon: %s, Type: %s", w.Name, w.Type)
 }

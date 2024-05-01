@@ -221,10 +221,14 @@ func HandleCombatChoice(g *Game) {
 			fmt.Printf("Dropped %d items:\n", len(items)) // Print the number of dropped items
 			// Iterate over the dropped items and print them
 			for _, item := range items {
-				// Depending on the type of item (Weapon or Gear), perform appropriate actions
-
-				fmt.Printf("%s", item) // Print the name of the dropped weapon
-
+				switch v := item.(type) {
+				case weapon.Weapon:
+					fmt.Println(v.String()) // Print the dropped weapon using its String method
+				case gear.Gear:
+					fmt.Println(v.String()) // Print the dropped gear using its String method
+				default:
+					fmt.Println("Unknown item type:", v)
+				}
 			}
 
 		case 'Q', 'q':

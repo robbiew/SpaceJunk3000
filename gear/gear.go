@@ -2,6 +2,7 @@ package gear
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -41,4 +42,8 @@ func LoadGear(filename string) ([]Gear, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+func (g *Gear) String() string {
+	return fmt.Sprintf("Gear: %s, Type: %s", g.Name, g.Type)
 }

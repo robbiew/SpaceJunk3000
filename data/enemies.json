@@ -12,7 +12,7 @@
 		"enemyExplDamage": 2,
 		"playerRangedDamage": 1,
 		"playerCloseDamage": 2,
-		"itemDrop": 2,
+		"itemDrop": 1,
         "initiative": true
     },
     {
