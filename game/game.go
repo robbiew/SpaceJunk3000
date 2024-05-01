@@ -125,10 +125,13 @@ func StartGame(playerName string, weapons []weapon.Weapon, implants []implant.Im
 // SelectCharacterType prompts the user to select a character type.
 func SelectCharacterType() player.CharacterType {
 
-	fmt.Println("Choose your character type:")
-	fmt.Println("1. Pirate")
-	fmt.Println("2. Space Marine")
-	fmt.Println("3. Empath")
+	doorutil.ClearScreen()
+	doorutil.DisplayAnsiFile("assets/selectCrew.ans", true)
+
+	// fmt.Println("Choose your character type:")
+	// fmt.Println("1. Pirate")
+	// fmt.Println("2. Space Marine")
+	// fmt.Println("3. Empath")
 
 	for {
 		// Initialize keyboard listener
@@ -151,9 +154,15 @@ func SelectCharacterType() player.CharacterType {
 		case '1':
 			return player.Pirate
 		case '2':
-			return player.SpaceMarine
+			return player.Marine
 		case '3':
 			return player.Empath
+		case '4':
+			return player.Spy
+		case '5':
+			return player.Scientist
+		case '6':
+			return player.Smuggler
 		default:
 			fmt.Println("Invalid choice, please select a valid character type.")
 		}

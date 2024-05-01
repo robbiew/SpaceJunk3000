@@ -10,6 +10,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/eiannone/keyboard"
 	"golang.org/x/text/encoding/charmap"
 )
 
@@ -115,7 +116,26 @@ func CursorShow() {
 func CursorHide() {
 	fmt.Print(Esc + "?25l")
 }
-func displayAnsiFile(filePath string, localDisplay bool) {
+
+// WaitForAnyKey waits for a user to press any key to continue.
+func WaitForAnyKey() error {
+	// Open the keyboard listener
+	err := keyboard.Open()
+	if err != nil {
+		return err
+	}
+	defer keyboard.Close() // Ensure that the keyboard listener is closed when done
+
+	// Wait for a single key press
+	_, _, err = keyboard.GetSingleKey()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DisplayAnsiFile(filePath string, localDisplay bool) {
 	content, err := ReadAnsiFile(filePath)
 	if err != nil {
 		log.Fatalf("Error reading file %s: %v", filePath, err)
@@ -133,7 +153,7 @@ func ReadAnsiFile(filePath string) (string, error) {
 }
 
 // Print ANSI art with a delay between lines
-func PrintAnsi(artContent string, delay int, localDisplay bool) { // Added localDisplay as an argument
+func PrintAnsi(artContent string, delay int, localDisplay bool) { // localDisplay as an argument for UTF-8 conversion
 	noSauce := TrimStringFromSauce(artContent) // strip off the SAUCE metadata
 	lines := strings.Split(noSauce, "\r\n")
 

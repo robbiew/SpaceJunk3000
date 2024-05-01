@@ -32,9 +32,13 @@ type Player struct {
 type CharacterType string
 
 const (
-	Pirate      CharacterType = "Pirate"
-	SpaceMarine CharacterType = "Space Marine"
-	Empath      CharacterType = "Empath"
+	Pirate    CharacterType = "Pirate"    // Miller
+	Marine    CharacterType = "Marine"    // Smith
+	Empath    CharacterType = "Empath"    // Tailor
+	Spy       CharacterType = "Spy"       // Tanner
+	Scientist CharacterType = "Scientist" // Abbot
+	Smuggler  CharacterType = "Smuggler"  // Cook
+
 )
 
 type Stats struct {
@@ -93,46 +97,79 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 // GetCharacterStats returns the stats associated with the provided character type.
 func GetCharacterStats(charType CharacterType) (Stats, error) {
 	switch charType {
-	case Pirate:
-		return Stats{Might: 1, Cunning: 1, Wisdom: 1}, nil
-	case SpaceMarine:
-		return Stats{Might: 2, Cunning: 2, Wisdom: 2}, nil
-	case Empath:
-		return Stats{Might: 3, Cunning: 3, Wisdom: 3}, nil
+	case Pirate: // Miller
+		return Stats{Might: 3, Cunning: 4, Wisdom: 1}, nil
+	case Marine: // Smith
+		return Stats{Might: 4, Cunning: 1, Wisdom: 3}, nil
+	case Empath: // Tailor
+		return Stats{Might: 1, Cunning: 4, Wisdom: 3}, nil
+	case Spy: // Tanner
+		return Stats{Might: 1, Cunning: 3, Wisdom: 4}, nil
+	case Scientist: // Abbot
+		return Stats{Might: 3, Cunning: 1, Wisdom: 4}, nil
+	case Smuggler: // Cook
+		return Stats{Might: 4, Cunning: 3, Wisdom: 1}, nil
 	default:
-		return Stats{}, fmt.Errorf("unsupported character type")
+		return Stats{}, fmt.Errorf("try again")
 	}
 }
 
 // getCrewDice returns the CrewDice associated with the provided character type.
 func GetCrewDice(charType CharacterType) (CrewDice, error) {
 	switch charType {
-	case Pirate:
-		return CrewDice{
-			DieSide1: "might",
-			DieSide2: "wisdom",
-			DieSide3: "might",
-			DieSide4: "double cunning",
-			DieSide5: "double might",
-			DieSide6: "cunning",
-		}, nil
-	case SpaceMarine:
+	case Pirate: // Miller
 		return CrewDice{
 			DieSide1: "cunning",
-			DieSide2: "wisdom",
-			DieSide3: "cunning",
-			DieSide4: "double cunning",
-			DieSide5: "double might",
-			DieSide6: "might",
+			DieSide2: "might",
+			DieSide3: "double cunning",
+			DieSide4: "cunning",
+			DieSide5: "wisdom",
+			DieSide6: "ddouble might",
 		}, nil
-	case Empath:
+	case Marine: // Smith
+		return CrewDice{
+			DieSide1: "might",
+			DieSide2: "cunning",
+			DieSide3: "double wisdom",
+			DieSide4: "might",
+			DieSide5: "wisdom",
+			DieSide6: "double might",
+		}, nil
+	case Empath: // Tailor
+		return CrewDice{
+			DieSide1: "cunning",
+			DieSide2: "might",
+			DieSide3: "double wisdom",
+			DieSide4: "cunning",
+			DieSide5: "might",
+			DieSide6: "double cunning",
+		}, nil
+	case Spy: // Tanner
 		return CrewDice{
 			DieSide1: "wisdom",
-			DieSide2: "might",
-			DieSide3: "wisdom",
-			DieSide4: "double cunning",
-			DieSide5: "double wisdom",
-			DieSide6: "cunning",
+			DieSide2: "cunning",
+			DieSide3: "double wisdom",
+			DieSide4: "wisdom",
+			DieSide5: "cunning",
+			DieSide6: "double cunning",
+		}, nil
+	case Scientist: // Abbot
+		return CrewDice{
+			DieSide1: "wisdom",
+			DieSide2: "cunning",
+			DieSide3: "double wisdom",
+			DieSide4: "wisdom",
+			DieSide5: "cunning",
+			DieSide6: "double might",
+		}, nil
+	case Smuggler: // Cook
+		return CrewDice{
+			DieSide1: "might",
+			DieSide2: "cunning",
+			DieSide3: "double cunning",
+			DieSide4: "might",
+			DieSide5: "cunning",
+			DieSide6: "double might",
 		}, nil
 	default:
 		return CrewDice{}, fmt.Errorf("unsupported character type")

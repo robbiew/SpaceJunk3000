@@ -34,7 +34,16 @@ func main() {
 	// Load or create player
 	p, err := player.LoadPlayer(playerName)
 	if err != nil {
-		fmt.Printf("Welcome, %s!\r\n", playerName)
+
+		doorutil.ClearScreen()
+		doorutil.CursorHide()
+		doorutil.DisplayAnsiFile("assets/start.ans", true)
+
+		err := doorutil.WaitForAnyKey()
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
 
 		// Select character type
 		charType := game.SelectCharacterType()

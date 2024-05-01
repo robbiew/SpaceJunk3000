@@ -62,7 +62,7 @@ func LoadEnemies(filename string) ([]Enemy, error) {
 	return enemies, nil
 }
 
-// DropItems returns the items dropped by the enemy.
+// DropItems returns a single item dropped by the enemy.
 func (e *Enemy) DropItems() ([]dropitem.Item, error) {
 	// Randomly choose between dropping a weapon or gear
 	if rand.Intn(2) == 0 {
