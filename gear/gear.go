@@ -44,9 +44,9 @@ func LoadGear(filename string) ([]Gear, error) {
 	return items, nil
 }
 
-// WeaponType returns the type of the weapon.
+// GearType returns the type of the weapon.
 func (g *Gear) GearType() string {
-	return g.GearTypeName // Update the reference to the field here
+	return g.GearTypeName
 }
 
 func (g *Gear) String() string {

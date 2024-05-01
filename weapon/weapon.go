@@ -6,6 +6,11 @@ import (
 	"os"
 )
 
+// WeaponWrapper wraps a weapon item.
+type WeaponWrapper struct {
+	Weapon *Weapon
+}
+
 // Weapon represents the characteristics of a game weapon.
 type Weapon struct {
 	Name           string `json:"name"`

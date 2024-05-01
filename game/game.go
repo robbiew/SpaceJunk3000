@@ -5,9 +5,8 @@ import (
 	"math/rand"
 	"spacejunk3000/doorutil"
 	"spacejunk3000/enemy"
-	"spacejunk3000/implant"
-
 	"spacejunk3000/gear"
+	"spacejunk3000/implant"
 	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
@@ -208,7 +207,6 @@ func HandleCombatChoice(g *Game) {
 			}
 			fmt.Printf("Dropped %d items:\n", len(items)) // Print the number of dropped items
 			// Iterate over the dropped items and print them
-			// Iterate over the dropped items and print them
 			for _, item := range items {
 				fmt.Println(item) // Print the dropped item
 				fmt.Println("Do you want to pick up this item? (Y/N)")
@@ -219,30 +217,29 @@ func HandleCombatChoice(g *Game) {
 				}
 				switch choice {
 				case 'Y', 'y':
-					// Check if the item is a weapon
-					if weaponItem, ok := item.(*weapon.Weapon); ok {
+					// Check the underlying type of item
+					switch item := item.(type) {
+					case *WeaponWrapper:
 						// Handle weapon
-						weaponType := weaponItem.WeaponType() // Use the WeaponType method to get the type
+						weapon := item.Weapon
+						weaponType := weapon.WeaponType()
 						fmt.Printf("Weapon type: %s\n", weaponType)
 						// Perform other actions specific to weapons
-					} else if gearItem, ok := item.(*gear.Gear); ok {
+					case *GearWrapper:
 						// Handle gear
-						gearType := gearItem.GearType() // Access the Type field directly
+						gear := item.Gear
+						gearType := gear.GearType()
 						fmt.Printf("Gear type: %s\n", gearType)
-						if err := g.Player.EquipGear(gearItem); err != nil {
+						if err := g.Player.EquipGear(gear); err != nil {
 							fmt.Println("Error equipping gear:", err)
 							// Handle error (e.g., inform the player)
 						} else {
-							fmt.Println("Gear equipped successfully:", gearItem.Name)
+							fmt.Println("Gear equipped successfully:", gear.Name)
 						}
-					} else {
+					default:
 						// Handle unknown item type
 						fmt.Println("Unknown item type:", item)
 					}
-				case 'N', 'n':
-					fmt.Println("You chose not to pick up the item.")
-				default:
-					fmt.Println("Invalid choice. Please select (Y/N).")
 				}
 			}
 
