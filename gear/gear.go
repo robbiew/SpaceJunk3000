@@ -1,6 +1,4 @@
-// item.go
-
-package item
+package gear
 
 import (
 	"encoding/json"
@@ -8,7 +6,7 @@ import (
 )
 
 // Item represents an item in the game.
-type Item struct {
+type Gear struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Slots       int    `json:"slots"`
@@ -19,8 +17,8 @@ type Item struct {
 }
 
 // NewItem creates a new item with the given attributes.
-func NewItem(name, description string, slots int, itemType string, heal int, damageType string, singleUse bool) *Item {
-	return &Item{
+func NewGear(name, description string, slots int, itemType string, heal int, damageType string, singleUse bool) *Gear {
+	return &Gear{
 		Name:        name,
 		Description: description,
 		Slots:       slots,
@@ -31,13 +29,13 @@ func NewItem(name, description string, slots int, itemType string, heal int, dam
 	}
 }
 
-// LoadItems loads items from a specified JSON file.
-func LoadItems(filename string) ([]Item, error) {
+// LoadGear loads items from a specified JSON file.
+func LoadGear(filename string) ([]Gear, error) {
 	bytes, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	var items []Item
+	var items []Gear
 	err = json.Unmarshal(bytes, &items)
 	if err != nil {
 		return nil, err

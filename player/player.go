@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"spacejunk3000/gear"
 	"spacejunk3000/implant"
 	"spacejunk3000/weapon"
 )
@@ -21,7 +22,8 @@ type Player struct {
 	NodeNum      int              `json:"-"`                // Unexported field
 	Weapons      []*weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
 	WeaponSlots  int              `json:"weapon_slots"`     // Number of filled weapon slots
-	ItemSlots    int              `json:"item_slots"`       // Number of filled item slots
+	Gear         []*gear.Gear     `json:"gear,omitempty"`   // Include a field for the gear
+	GearSlots    int              `json:"gear_slots"`       // Number of filled item slots
 	MaxSlots     int              `json:"max_slots"`        // Maximum number of total slots
 	CrewDice     CrewDice         `json:"crew_dice"`
 	Implant      implant.Implant  `json:"implant"` // Include a field for the implants
@@ -81,7 +83,10 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 		Alive:        true,
 		MaxSlots:     4,                         // Default value, can be modified if needed
 		Weapons:      make([]*weapon.Weapon, 0), // Initialize the weapons slice
+		WeaponSlots:  0,                         // Initialize the weapon slots
 		Implant:      implant.Implant{},         // Initialize the implant
+		Gear:         make([]*gear.Gear, 0),     // Initialize the gear slice
+		GearSlots:    0,                         // Initialize the gear slots
 	}, nil
 }
 
@@ -173,7 +178,7 @@ func ResetPlayer(p *Player) {
 	p.Alive = true
 	p.Weapons = nil
 	p.WeaponSlots = 0
-	p.ItemSlots = 0
+	p.GearSlots = 0
 	p.MaxSlots = 4
 
 	// Additional reset logic as needed

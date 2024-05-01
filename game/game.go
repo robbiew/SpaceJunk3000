@@ -7,6 +7,7 @@ import (
 	"spacejunk3000/enemy"
 	"spacejunk3000/implant"
 
+	"spacejunk3000/gear"
 	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
@@ -20,6 +21,7 @@ type Game struct {
 	Player          *player.Player
 	Enemies         []enemy.Enemy
 	Weapons         []weapon.Weapon
+	Gear            []gear.Gear
 	Location        location.Location
 	CurrentEnemy    enemy.Enemy
 	UsedHealthDrone bool // whether the health drone has been used in the current encounter
@@ -176,8 +178,8 @@ func PresentCombatOptions(g *Game) {
 	fmt.Println("\r\nChoose your action:")
 
 	fmt.Println("[Q] Quit - run away, lose health, items)")
-	fmt.Println("[D] Defend")
-	fmt.Println("[U] Use an item or a tech implant (if you have any)")
+	fmt.Println("[G] Use Gear")
+	fmt.Println("[C] Use Cyber implant")
 	if !g.UsedHealthDrone {
 		fmt.Println("[H] Activate Health Drone - heal (once per day)")
 	} else {
@@ -209,19 +211,34 @@ func HandleCombatChoice(g *Game) {
 		switch char {
 		case 'F', 'f':
 			// Hand to hand combat logic
-			fmt.Println("You chose hand to hand combat.")
+			fmt.Printf("You chose hand to hand combat with %s\n", g.CurrentEnemy.Name)
+			items, err := g.CurrentEnemy.DropItems()
+			if err != nil {
+				// Handle error
+				fmt.Println("Error dropping items:", err)
+				return
+			}
+			fmt.Printf("Dropped %d items:\n", len(items)) // Print the number of dropped items
+			// Iterate over the dropped items and print them
+			for _, item := range items {
+				// Depending on the type of item (Weapon or Gear), perform appropriate actions
+
+				fmt.Printf("%s", item) // Print the name of the dropped weapon
+
+			}
+
 		case 'Q', 'q':
 			// Run away logic
 			fmt.Println("You chose to run away.")
-		case 'D', 'd':
-			// Defend logic
-			fmt.Println("You chose to defend.")
+		case 'G', 'g':
+			// Gear logic
+			fmt.Println("You chose to use gear.")
 		case 'R', 'r':
 			// Reload logic
 			fmt.Println("You chose to reload.")
-		case 'U', 'u':
-			// Use item or tech implant logic
-			fmt.Println("You chose to use an item or a tech implant.")
+		case 'C', 'c':
+			// Use implant logic
+			fmt.Println("You chose to use an implant.")
 			// Check if the player has an implant
 			if g.Player.Implant.Name != "" {
 				// If the player has an implant, perform actions with it
