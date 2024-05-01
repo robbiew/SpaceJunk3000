@@ -1,4 +1,4 @@
-package dropitems
+package dropitem
 
 import (
 	"spacejunk3000/gear"

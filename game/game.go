@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"spacejunk3000/doorutil"
-	"spacejunk3000/dropitems"
+	"spacejunk3000/dropitem"
 	"spacejunk3000/enemy"
 	"spacejunk3000/gear"
 	"spacejunk3000/implant"
@@ -221,13 +221,13 @@ func HandleCombatChoice(g *Game) {
 				case 'Y', 'y':
 					// Check the underlying type of item
 					switch item := item.(type) {
-					case *dropitems.WeaponWrapper:
+					case *dropitem.WeaponWrapper:
 						// Handle weapon
 						weapon := item.Weapon
 						weaponType := weapon.WeaponType()
 						fmt.Printf("Weapon type: %s\n", weaponType)
 						// Perform other actions specific to weapons
-					case *dropitems.GearWrapper:
+					case *dropitem.GearWrapper:
 						// Handle gear
 						gear := item.Gear
 						gearType := gear.GearType()
