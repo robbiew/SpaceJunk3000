@@ -121,18 +121,6 @@ func StartGame(playerName string, weapons []weapon.Weapon, implants []implant.Im
 	return p, nil
 }
 
-// UpdateHealth updates the player's health and handles death.
-func UpdateHealth(p *player.Player, delta int) {
-	p.Health += delta
-	if p.Health <= 0 {
-		p.Alive = false
-		player.SavePlayer(p) // Save the dead state
-		fmt.Println("You have died and must start over.")
-		player.ResetPlayer(p) // Reset for new game start
-	}
-	player.SavePlayer(p) // Save any changes to player data
-}
-
 // SelectCharacterType prompts the user to select a character type.
 func SelectCharacterType() player.CharacterType {
 
@@ -189,7 +177,7 @@ func PresentCombatOptions(g *Game) {
 
 	// Check if the player has a ranged weapon
 	for _, w := range g.Player.Weapons {
-		if w.Type == "Ranged Weapon" {
+		if w.WeaponTypeName == "Ranged Weapon" {
 			fmt.Println("[S] Shoot - Ranged Weapon")
 			fmt.Println("[R] Reload - Ranged Weapon")
 			break
@@ -220,14 +208,41 @@ func HandleCombatChoice(g *Game) {
 			}
 			fmt.Printf("Dropped %d items:\n", len(items)) // Print the number of dropped items
 			// Iterate over the dropped items and print them
+			// Iterate over the dropped items and print them
 			for _, item := range items {
-				switch v := item.(type) {
-				case weapon.Weapon:
-					fmt.Println(v.String()) // Print the dropped weapon using its String method
-				case gear.Gear:
-					fmt.Println(v.String()) // Print the dropped gear using its String method
+				fmt.Println(item) // Print the dropped item
+				fmt.Println("Do you want to pick up this item? (Y/N)")
+				choice, _, err := keyboard.GetSingleKey()
+				if err != nil {
+					fmt.Println("Error reading keyboard input:", err)
+					continue // Continue to loop for valid input
+				}
+				switch choice {
+				case 'Y', 'y':
+					// Check if the item is a weapon
+					if weaponItem, ok := item.(*weapon.Weapon); ok {
+						// Handle weapon
+						weaponType := weaponItem.WeaponType() // Use the WeaponType method to get the type
+						fmt.Printf("Weapon type: %s\n", weaponType)
+						// Perform other actions specific to weapons
+					} else if gearItem, ok := item.(*gear.Gear); ok {
+						// Handle gear
+						gearType := gearItem.GearType() // Access the Type field directly
+						fmt.Printf("Gear type: %s\n", gearType)
+						if err := g.Player.EquipGear(gearItem); err != nil {
+							fmt.Println("Error equipping gear:", err)
+							// Handle error (e.g., inform the player)
+						} else {
+							fmt.Println("Gear equipped successfully:", gearItem.Name)
+						}
+					} else {
+						// Handle unknown item type
+						fmt.Println("Unknown item type:", item)
+					}
+				case 'N', 'n':
+					fmt.Println("You chose not to pick up the item.")
 				default:
-					fmt.Println("Unknown item type:", v)
+					fmt.Println("Invalid choice. Please select (Y/N).")
 				}
 			}
 
@@ -299,7 +314,7 @@ func HandleEncounter(g *Game) {
 	fmt.Println("\r\nEquipped Weapons:")
 	for _, w := range g.Player.Weapons {
 		// Check if the weapon is of type "Ranged"
-		if w.Type == "Ranged Weapon" {
+		if w.WeaponTypeName == "Ranged Weapon" {
 			fmt.Printf("- %s (Ammo: %d)\r\n", w.Name, w.Ammo)
 		} else {
 			fmt.Printf("- %s\r\n", w.Name)

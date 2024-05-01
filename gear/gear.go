@@ -8,25 +8,25 @@ import (
 
 // Item represents an item in the game.
 type Gear struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Slots       int    `json:"slots"`
-	Type        string `json:"type"`
-	Heal        int    `json:"heal,omitempty"`
-	DamageType  string `json:"damage_type,omitempty"`
-	SingleUse   bool   `json:"single_use"`
+	Name         string `json:"name"`
+	Description  string `json:"description"`
+	Slots        int    `json:"slots"`
+	GearTypeName string `json:"type"`
+	Heal         int    `json:"heal,omitempty"`
+	DamageType   string `json:"damage_type,omitempty"`
+	SingleUse    bool   `json:"single_use"`
 }
 
 // NewItem creates a new item with the given attributes.
-func NewGear(name, description string, slots int, itemType string, heal int, damageType string, singleUse bool) *Gear {
+func NewGear(name, description string, slots int, gearTypeName string, heal int, damageType string, singleUse bool) *Gear {
 	return &Gear{
-		Name:        name,
-		Description: description,
-		Slots:       slots,
-		Type:        itemType,
-		Heal:        heal,
-		DamageType:  damageType,
-		SingleUse:   singleUse,
+		Name:         name,
+		Description:  description,
+		Slots:        slots,
+		GearTypeName: gearTypeName,
+		Heal:         heal,
+		DamageType:   damageType,
+		SingleUse:    singleUse,
 	}
 }
 
@@ -44,6 +44,11 @@ func LoadGear(filename string) ([]Gear, error) {
 	return items, nil
 }
 
+// WeaponType returns the type of the weapon.
+func (g *Gear) GearType() string {
+	return g.GearTypeName // Update the reference to the field here
+}
+
 func (g *Gear) String() string {
-	return fmt.Sprintf("Gear: %s, Type: %s", g.Name, g.Type)
+	return fmt.Sprintf("Gear: %s, Type: %s", g.Name, g.GearTypeName)
 }

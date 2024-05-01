@@ -184,6 +184,25 @@ func ResetPlayer(p *Player) {
 	// Additional reset logic as needed
 }
 
+// EquipGear equips a gear to the player if there are available slots.
+func (p *Player) EquipGear(g *gear.Gear) error {
+	// Check if there are enough gear slots to equip the gear
+	if p.GearSlots+g.Slots > p.MaxSlots {
+		return fmt.Errorf("cannot carry that much")
+	}
+
+	// Equip the gear to the player
+	p.Gear = append(p.Gear, g)
+	p.GearSlots += g.Slots
+
+	// Save the player's data after equipping the weapon
+	if err := SavePlayer(p); err != nil {
+		return fmt.Errorf("failed to save player: %v", err)
+	}
+
+	return nil
+}
+
 // EquipWeapon equips a weapon to the player if there are available slots.
 func (p *Player) EquipWeapon(w *weapon.Weapon) error {
 	// Check if there are enough weapon slots to equip the weapon
@@ -194,6 +213,11 @@ func (p *Player) EquipWeapon(w *weapon.Weapon) error {
 	// Equip the weapon to the player
 	p.Weapons = append(p.Weapons, w)
 	p.WeaponSlots += w.Slots
+
+	// Save the player's data after equipping the weapon
+	if err := SavePlayer(p); err != nil {
+		return fmt.Errorf("failed to save player: %v", err)
+	}
 
 	return nil
 }
@@ -245,4 +269,16 @@ func (p *Player) DisplayHealthRecord() string {
 	record += "└──────────────────────────────┘"
 
 	return record
+}
+
+// UpdateHealth updates the player's health and handles death.
+func UpdateHealth(p *Player, delta int) {
+	p.Health += delta
+	if p.Health <= 0 {
+		p.Alive = false
+		SavePlayer(p) // Save the dead state
+		fmt.Println("You have died and must start over.")
+		ResetPlayer(p) // Reset for new game start
+	}
+	SavePlayer(p) // Save any changes to player data
 }
