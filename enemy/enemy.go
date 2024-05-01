@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"spacejunk3000/dropitems"
 	"spacejunk3000/gear"
-	"spacejunk3000/item"
 	"spacejunk3000/weapon"
 )
 
@@ -63,7 +63,7 @@ func LoadEnemies(filename string) ([]Enemy, error) {
 }
 
 // DropItems returns the items dropped by the enemy.
-func (e *Enemy) DropItems() ([]item.Item, error) {
+func (e *Enemy) DropItems() ([]dropitems.Item, error) {
 	// Randomly choose between dropping a weapon or gear
 	if rand.Intn(2) == 0 {
 		// Enemy drops a weapon
@@ -74,7 +74,7 @@ func (e *Enemy) DropItems() ([]item.Item, error) {
 		if len(weapons) > 0 {
 			randomIndex := rand.Intn(len(weapons))
 			fmt.Println("Adding weapon:", weapons[randomIndex].Name) // Debug print
-			return []item.Item{&item.WeaponWrapper{Weapon: &weapons[randomIndex]}}, nil
+			return []dropitems.Item{&dropitems.WeaponWrapper{Weapon: &weapons[randomIndex]}}, nil
 		}
 	} else {
 		// Enemy drops gear
@@ -85,7 +85,7 @@ func (e *Enemy) DropItems() ([]item.Item, error) {
 		if len(gears) > 0 {
 			randomIndex := rand.Intn(len(gears))
 			fmt.Println("Adding gear:", gears[randomIndex].Name) // Debug print
-			return []item.Item{&item.GearWrapper{Gear: &gears[randomIndex]}}, nil
+			return []dropitems.Item{&dropitems.GearWrapper{Gear: &gears[randomIndex]}}, nil
 		}
 	}
 

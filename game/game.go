@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"math/rand"
 	"spacejunk3000/doorutil"
+	"spacejunk3000/dropitems"
 	"spacejunk3000/enemy"
 	"spacejunk3000/gear"
 	"spacejunk3000/implant"
 	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
+
 	"strconv"
 	"time"
 
@@ -206,7 +208,7 @@ func HandleCombatChoice(g *Game) {
 				return
 			}
 			fmt.Printf("Dropped %d items:\n", len(items)) // Print the number of dropped items
-			// Iterate over the dropped items and print them
+			// Iterate over the dropped items and print thssem
 			for _, item := range items {
 				fmt.Println(item) // Print the dropped item
 				fmt.Println("Do you want to pick up this item? (Y/N)")
@@ -219,13 +221,13 @@ func HandleCombatChoice(g *Game) {
 				case 'Y', 'y':
 					// Check the underlying type of item
 					switch item := item.(type) {
-					case *WeaponWrapper:
+					case *dropitems.WeaponWrapper:
 						// Handle weapon
 						weapon := item.Weapon
 						weaponType := weapon.WeaponType()
 						fmt.Printf("Weapon type: %s\n", weaponType)
 						// Perform other actions specific to weapons
-					case *GearWrapper:
+					case *dropitems.GearWrapper:
 						// Handle gear
 						gear := item.Gear
 						gearType := gear.GearType()
