@@ -8,4 +8,8 @@
  - CP437 (some UTF-8 local support)
 
 To Do:
-[ ] Implement combat mechanics
+- [ ] combat mechanics
+- [ ] post-combat game/round clean-up
+- [ ] end game conditions
+- [ ] leaderboards
+- [ ] artwork
