@@ -8,7 +8,7 @@ import (
 	"spacejunk3000/enemy"
 	"spacejunk3000/game"
 	"spacejunk3000/implant"
-	"spacejunk3000/location"
+
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
 )
@@ -72,12 +72,6 @@ func main() {
 		}
 	}
 
-	// Load locations from JSON file
-	locations, err := location.LoadLocations("data/locations.json")
-	if err != nil {
-		log.Fatalf("Failed to load locations: %v", err)
-	}
-
 	// Load enemies from JSON file
 	enemies, err := enemy.LoadEnemies("data/enemies.json")
 	if err != nil {
@@ -97,7 +91,7 @@ func main() {
 	}
 
 	// Initialize and start the game with all required arguments
-	g, err := game.NewGame(playerName, p.Type, weapons, implants, locations, enemies)
+	g, err := game.NewGame(playerName, p.Type, weapons, implants, enemies)
 	if err != nil {
 		log.Fatalf("Failed to initialize game: %v", err)
 	}

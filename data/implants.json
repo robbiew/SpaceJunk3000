@@ -1,10 +1,26 @@
 [
-    {
-        "name": "Advanced Targetting",
-        "desc": "Take another shot in Ranged Combat."
-    },
-    {
-        "name": "Combat Protocol",
-        "desc": "Strike another hit in Close Combat"
-    }
+  {
+    "name": "Targeting",
+    "desc": "Re-take a failed shot (Ranged)"
+  },
+  {
+    "name": "Combat Protocol",
+    "desc": "Strike another blow in Close Combat"
+  },
+  {
+    "name": "Reflexes",
+    "desc": "Shoot an extra shot (Ranged)"
+  },
+  {
+    "name": "Auto Cortex",
+    "desc": "placeholder desc"
+  },
+  {
+    "name": "Neural Override",
+    "desc": "Target a weak spot (Ranged)"
+  },
+  {
+    "name": "Weak Point",
+    "desc": "Target a weak spot (Close Combat)"
+  }
 ]

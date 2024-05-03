@@ -8,7 +8,6 @@ import (
 	"spacejunk3000/enemy"
 	"spacejunk3000/gear"
 	"spacejunk3000/implant"
-	"spacejunk3000/location"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
 
@@ -23,7 +22,6 @@ type Game struct {
 	Enemies         []enemy.Enemy
 	Weapons         []weapon.Weapon
 	Gear            []gear.Gear
-	Location        location.Location
 	CurrentEnemy    enemy.Enemy
 	UsedHealthDrone bool // whether the health drone has been used in the current encounter
 	Implants        []implant.Implant
@@ -84,7 +82,7 @@ func InitializePlayer(playerName string, weapons []weapon.Weapon, implants []imp
 	return p, nil
 }
 
-func NewGame(playerName string, charType player.CharacterType, weapons []weapon.Weapon, implants []implant.Implant, locations []location.Location, enemies []enemy.Enemy) (*Game, error) {
+func NewGame(playerName string, charType player.CharacterType, weapons []weapon.Weapon, implants []implant.Implant, enemies []enemy.Enemy) (*Game, error) {
 	// Initialize the player
 	p, err := InitializePlayer(playerName, weapons, implants)
 	if err != nil {
@@ -94,9 +92,7 @@ func NewGame(playerName string, charType player.CharacterType, weapons []weapon.
 	// Randomly select a location and enemy
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
-	randomLocationIndex := random.Intn(len(locations))
 	randomEnemyIndex := random.Intn(len(enemies))
-	selectedLocation := locations[randomLocationIndex]
 	selectedEnemy := enemies[randomEnemyIndex]
 
 	// Create the Game instance
@@ -104,7 +100,6 @@ func NewGame(playerName string, charType player.CharacterType, weapons []weapon.
 		Player:       p,
 		Enemies:      enemies,
 		Weapons:      weapons,
-		Location:     selectedLocation,
 		CurrentEnemy: selectedEnemy,
 	}
 
@@ -125,13 +120,9 @@ func StartGame(playerName string, weapons []weapon.Weapon, implants []implant.Im
 // SelectCharacterType prompts the user to select a character type.
 func SelectCharacterType() player.CharacterType {
 
+	// Clear the screen and display the character selection menu
 	doorutil.ClearScreen()
 	doorutil.DisplayAnsiFile("assets/selectCrew.ans", true)
-
-	// fmt.Println("Choose your character type:")
-	// fmt.Println("1. Pirate")
-	// fmt.Println("2. Space Marine")
-	// fmt.Println("3. Empath")
 
 	for {
 		// Initialize keyboard listener
@@ -172,7 +163,7 @@ func SelectCharacterType() player.CharacterType {
 // Function to present the user with combat options.
 func PresentCombatOptions(g *Game) {
 	fmt.Println("\r\nEncounter!")
-	fmt.Printf("You've encountered an enemy at %s: %s\r\n", g.Location.Name, g.CurrentEnemy.Name)
+	fmt.Printf("You've encountered an enemy: %s\r\n", g.CurrentEnemy.Name)
 	fmt.Println("\r\nChoose your action:")
 
 	fmt.Println("[Q] Quit - run away, lose health, items)")
@@ -312,20 +303,38 @@ func HandleEncounter(g *Game) {
 	doorutil.ClearScreen()
 
 	// Print player information
-	fmt.Printf("Player Name: %s\n", g.Player.Name)
+	fmt.Printf("Name: %s\n", g.Player.Name)
 	fmt.Printf("Health: %d\n", g.Player.Health)
 
 	// Display the health record using the DisplayHealthRecord method
-	fmt.Printf("%s", g.Player.DisplayHealthRecord())
+	// fmt.Printf("%s", g.Player.DisplayHealthRecord())
+
+	// Show available implants
+	fmt.Println("\r\nImplants:")
+	if g.Player.Implant.Name != "" {
+		fmt.Printf("- %s\r\n", g.Player.Implant.Name)
+	} else {
+		fmt.Println("- No implants equipped")
+	}
 
 	// Show available weapons and their ammo
-	fmt.Println("\r\nEquipped Weapons:")
+	fmt.Println("\r\nWeapons:")
 	for _, w := range g.Player.Weapons {
 		// Check if the weapon is of type "Ranged"
 		if w.WeaponTypeName == "Ranged Weapon" {
 			fmt.Printf("- %s (Ammo: %d)\r\n", w.Name, w.Ammo)
 		} else {
 			fmt.Printf("- %s\r\n", w.Name)
+		}
+	}
+
+	// Print player's equipped gear
+	fmt.Println("Equipped Gear:")
+	if len(g.Gear) == 0 {
+		fmt.Println("- None")
+	} else {
+		for _, g := range g.Gear {
+			fmt.Printf("- %s\n", g.Name)
 		}
 	}
 

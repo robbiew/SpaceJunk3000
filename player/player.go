@@ -22,7 +22,7 @@ type Player struct {
 	NodeNum      int              `json:"-"`                // Unexported field
 	Weapons      []*weapon.Weapon `json:"weapon,omitempty"` // Include a field for the weapon
 	WeaponSlots  int              `json:"weapon_slots"`     // Number of filled weapon slots
-	Gear         []*gear.Gear     `json:"gear,omitempty"`   // Include a field for the gear
+	Gear         []*gear.Gear     `json:"gear"`             // Include a field for the gear
 	GearSlots    int              `json:"gear_slots"`       // Number of filled item slots
 	MaxSlots     int              `json:"max_slots"`        // Maximum number of total slots
 	CrewDice     CrewDice         `json:"crew_dice"`
