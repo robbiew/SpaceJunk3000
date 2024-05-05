@@ -5,7 +5,7 @@
     "ammo_type": "Energy",
     "ammo_capacity": 1,
     "ammo": 1,
-    "fire_rate": "Single",
+    "fire_rate": 1,
     "slots": 1
   },
   {
@@ -19,7 +19,7 @@
     "ammo_type": "Ballistic",
     "ammo_capacity": 3,
     "ammo": 1,
-    "fire_rate": "Multiple",
+    "fire_rate": 1,
     "slots": 2
   }
 ]

@@ -27,6 +27,7 @@ type Player struct {
 	MaxSlots     int              `json:"max_slots"`        // Maximum number of total slots
 	CrewDice     CrewDice         `json:"crew_dice"`
 	Implant      implant.Implant  `json:"implant"` // Include a field for the implants
+
 }
 
 type CharacterType string
@@ -91,6 +92,7 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 		Implant:      implant.Implant{},         // Initialize the implant
 		Gear:         make([]*gear.Gear, 0),     // Initialize the gear slice
 		GearSlots:    0,                         // Initialize the gear slots
+
 	}, nil
 }
 

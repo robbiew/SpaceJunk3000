@@ -12,14 +12,14 @@ type Weapon struct {
 	WeaponTypeName string `json:"type"` // Rename the field to avoid conflict
 	AmmoType       string `json:"ammo_type,omitempty"`
 	AmmoCapacity   int    `json:"ammo_capacity,omitempty"`
-	FireRate       string `json:"fire_rate,omitempty"`
+	FireRate       int    `json:"fire_rate,omitempty"`
 	Jammed         bool   `json:"jammed,omitempty"`
 	Slots          int    `json:"slots"`
 	Ammo           int    `json:"ammo,omitempty"`
 }
 
 // NewWeapon creates a new weapon with the given attributes.
-func NewWeapon(name, weaponTypeName, ammoType string, ammoCapacity int, fireRate string, jammed bool, slots, ammo int) *Weapon {
+func NewWeapon(name, weaponTypeName, ammoType string, ammoCapacity int, fireRate int, jammed bool, slots, ammo int) *Weapon {
 	return &Weapon{
 		Name:           name,
 		WeaponTypeName: weaponTypeName, // Update the field name here

@@ -188,6 +188,7 @@ func PresentCombatOptions(g *Game) {
 
 // HandleCombatChoice handles user's combat choice including selecting an implant if needed.
 func HandleCombatChoice(g *Game) {
+	quitGame := false
 	for {
 		fmt.Println("\r\nChoose your action:")
 
@@ -246,8 +247,11 @@ func HandleCombatChoice(g *Game) {
 			}
 
 		case 'Q', 'q':
-			// Run away logic
-			fmt.Println("You chose to run away.")
+			// Quit the game
+			fmt.Println("You chose to quit the game. Goodbye!")
+			quitGame = true
+			return // Exit the function, effectively ending the game loop
+
 		case 'G', 'g':
 			// Gear logic
 			fmt.Println("You chose to use gear.")
@@ -277,15 +281,18 @@ func HandleCombatChoice(g *Game) {
 		case 'S', 's':
 			// Ranged combat logic
 			fmt.Println("You chose to shoot.")
+			ShootWithRangedWeapon(g)
 		default:
 			fmt.Println("Invalid choice. Please select a valid option.")
 			continue // Continue to loop for valid input
 		}
-		// Break out of the loop if a valid choice is made
-		if g.UsedHealthDrone || char == 'F' || char == 'f' || char == 'Q' || char == 'q' || char == 'D' || char == 'd' || char == 'R' || char == 'r' || char == 'U' || char == 'u' || char == 'S' || char == 's' {
+
+		if g.Player.Health <= 0 {
+			fmt.Println("Game Over! You are dead.")
 			break
-		} else {
-			fmt.Println("Invalid choice. Please select a valid option.")
+		}
+		if quitGame {
+			break
 		}
 	}
 }
@@ -293,7 +300,7 @@ func HandleCombatChoice(g *Game) {
 // At the start of each new encounter, you need to reset the UsedHealthDrone field
 func StartNewEncounter(g *Game) {
 	// Reset the health drone availability for the new encounter
-	g.UsedHealthDrone = true
+	g.UsedHealthDrone = false
 	// Continue with encounter setup...
 	HandleEncounter(g)
 }
@@ -338,11 +345,26 @@ func HandleEncounter(g *Game) {
 		}
 	}
 
-	// Present combat options
-	PresentCombatOptions(g)
+	// Start the game loop
+	for {
+		// Present combat options
+		PresentCombatOptions(g)
 
-	// Handle user choice
-	HandleCombatChoice(g)
+		// Handle user choice
+		HandleCombatChoice(g)
+
+		// Check if the player is dead
+		if g.Player.Health <= 0 {
+			fmt.Println("Game Over! You are dead.")
+			return
+		}
+
+		// Check if the enemy is dead
+		if g.CurrentEnemy.Health <= 0 {
+			fmt.Printf("You defeated the %s!\n", g.CurrentEnemy.Name)
+			return
+		}
+	}
 }
 
 // Function to get user's choice.
@@ -370,4 +392,114 @@ func GetUserChoice(g *Game) int {
 		fmt.Println("Invalid choice. Please select a valid option.")
 		PresentCombatOptions(g) // Present combat options again
 	}
+}
+
+// ShootWithRangedWeapon simulates shooting with a ranged weapon.
+func ShootWithRangedWeapon(g *Game) {
+	// Check if the player has a ranged weapon
+	hasRangedWeapon := false
+	for _, w := range g.Player.Weapons {
+		if w.WeaponTypeName == "Ranged Weapon" {
+			hasRangedWeapon = true
+			break
+		}
+	}
+	if !hasRangedWeapon {
+		fmt.Println("You do not have a ranged weapon.")
+		return
+	}
+
+	// Select the ranged weapon to use if the player has multiple
+	var selectedWeapon *weapon.Weapon
+	if len(g.Player.Weapons) > 1 {
+		// Implement logic to let the player select a weapon
+		// For simplicity, we'll just select the first ranged weapon
+		for _, w := range g.Player.Weapons {
+			if w.WeaponTypeName == "Ranged Weapon" {
+				selectedWeapon = w
+				break
+			}
+		}
+	} else {
+		selectedWeapon = g.Player.Weapons[0]
+	}
+
+	// Check if the player has enough ammo for the required fire rate of the selected weapon
+	fmt.Printf("Selected weapon: %s, Ammo: %d, Fire Rate: %d \n", selectedWeapon.Name, selectedWeapon.Ammo, selectedWeapon.FireRate)
+	if selectedWeapon.Ammo < selectedWeapon.FireRate {
+		fmt.Println("You do not have enough ammo for this weapon.")
+		return
+	}
+
+	// Select the fire rate
+	// For simplicity, we'll assume the fire rate is always 1
+	fireRate := 1
+
+	// Fire the weapon and deplete the ammo
+	selectedWeapon.Ammo -= fireRate
+
+	// Save the player's updated data after firing
+	if err := player.SavePlayer(g.Player); err != nil {
+		fmt.Printf("Error saving player data: %v\n", err)
+	}
+
+	// Roll ammo dice for each ammo fired
+	// For simplicity, we'll just simulate the dice roll without actual dice mechanics
+	// We'll use a random number generator to simulate the dice roll
+	ammoHits := make(map[string]int)
+	for i := 0; i < fireRate; i++ {
+		// Simulate dice roll for each ammo type
+		// For simplicity, we'll just assume hits for now
+		ammoType := selectedWeapon.AmmoType
+		hit := simulateHit()
+		if hit {
+			fmt.Println("Shot hit!")
+			ammoHits[ammoType]++
+			applyRandomVulnerabilityReduction(&g.Enemies[0], ammoType)
+		} else {
+			fmt.Println("Shot missed.")
+		}
+	}
+
+	// Apply ammo hits to enemies
+	for _, enemy := range g.Enemies {
+		// Check if the enemy is within range
+		// For simplicity, we'll assume all enemies are within range
+		// Apply damage based on ammo hits and enemy's vulnerabilities
+		switch selectedWeapon.AmmoType {
+		case "Energy":
+			enemy.Health -= ammoHits["Energy"] * enemy.EnemyEnerDamage
+		case "Ballistic":
+			enemy.Health -= ammoHits["Ballistic"] * enemy.EnemyBallDamage
+		case "Explosive":
+			enemy.Health -= ammoHits["Explosive"] * enemy.EnemyExplDamage
+		}
+	}
+
+	// Continue combat logic...
+}
+
+// applyRandomVulnerabilityReduction reduces one of the enemy's vulnerabilities corresponding to the player's ammo type.
+func applyRandomVulnerabilityReduction(enemy *enemy.Enemy, ammoType string) {
+	// Determine which vulnerability to reduce based on the ammo type
+	switch ammoType {
+	case "Energy":
+		if enemy.ToHitMightDie > 0 {
+			enemy.ToHitMightDie--
+		}
+	case "Ballistic":
+		if enemy.ToHitCunningDie > 0 {
+			enemy.ToHitCunningDie--
+		}
+	case "Explosive":
+		if enemy.ToHitWisdomDie > 0 {
+			enemy.ToHitWisdomDie--
+		}
+	}
+}
+
+// simulateHit simulates whether a shot hits or misses.
+func simulateHit() bool {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(2) == 0 // 50% chance of hit or miss
 }
