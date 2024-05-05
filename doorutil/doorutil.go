@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/eiannone/keyboard"
@@ -95,6 +96,36 @@ const (
 
 	Reset = Esc + "0m"
 )
+
+// Prompt the user and get their choice
+func PromptYesNo(question string) (string, error) {
+	// Print the prompt
+	fmt.Printf("%s (yes/no)", question)
+
+	// Open keyboard listener
+	err := keyboard.Open()
+	if err != nil {
+		return "", err
+	}
+	defer keyboard.Close()
+
+	// Listen for single key press
+	char, _, err := keyboard.GetSingleKey()
+	if err != nil {
+		return "", err
+	}
+
+	// Convert the pressed key to lowercase string
+	choice := string(unicode.ToLower(rune(char)))
+
+	// Check if the choice is valid
+	if choice != "y" && choice != "n" {
+		fmt.Println("Invalid choice. Please enter 'y' or 'n'.")
+		return PromptYesNo(question)
+	}
+
+	return choice, nil
+}
 
 // Move cursor to X, Y location
 func MoveCursor(x int, y int) {

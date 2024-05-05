@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"spacejunk3000/doorutil"
 	"spacejunk3000/dropitem"
@@ -25,6 +26,7 @@ type Game struct {
 	CurrentEnemy    enemy.Enemy
 	UsedHealthDrone bool // whether the health drone has been used in the current encounter
 	Implants        []implant.Implant
+	QuitGame        bool
 }
 
 // InitializePlayer initializes a player by loading an existing one or creating a new one if not found.
@@ -101,6 +103,7 @@ func NewGame(playerName string, charType player.CharacterType, weapons []weapon.
 		Enemies:      enemies,
 		Weapons:      weapons,
 		CurrentEnemy: selectedEnemy,
+		QuitGame:     false,
 	}
 
 	return game, nil
@@ -186,9 +189,94 @@ func PresentCombatOptions(g *Game) {
 	}
 }
 
+// Function to handle an encounter.
+func HandleEncounter(g *Game) {
+	doorutil.ClearScreen()
+
+	// Print player information
+	fmt.Printf("Name: %s\n", g.Player.Name)
+	fmt.Printf("Health: %d\n", g.Player.Health)
+
+	// Display the health record using the DisplayHealthRecord method
+	// fmt.Printf("%s", g.Player.DisplayHealthRecord())
+
+	// Show available implants
+	fmt.Println("\r\nImplants:")
+	if g.Player.Implant.Name != "" {
+		fmt.Printf("- %s\r\n", g.Player.Implant.Name)
+	} else {
+		fmt.Println("- No implants equipped")
+	}
+
+	// Show available weapons and their ammo
+	fmt.Println("\r\nWeapons:")
+	for _, w := range g.Player.Weapons {
+		// Check if the weapon is of type "Ranged"
+		if w.WeaponTypeName == "Ranged Weapon" {
+			fmt.Printf("- %s (Ammo: %d)\r\n", w.Name, w.Ammo)
+		} else {
+			fmt.Printf("- %s\r\n", w.Name)
+		}
+	}
+
+	// Print player's equipped gear
+	fmt.Println("Equipped Gear:")
+	if len(g.Gear) == 0 {
+		fmt.Println("- None")
+	} else {
+		for _, g := range g.Gear {
+			fmt.Printf("- %s\n", g.Name)
+		}
+	}
+
+	// Start the game loop
+	for {
+		// Present combat options
+		PresentCombatOptions(g)
+
+		// Handle user choice
+		HandleCombatChoice(g)
+
+		// Check if the player is dead or chooses to quit
+		if g.Player.Health <= 0 {
+			fmt.Println("Game Over! You are dead.")
+			return
+		}
+
+		// Check if the player chooses to quit
+		if g.QuitGame {
+			// Prompt for playing again
+			choice, err := doorutil.PromptYesNo("Quitting will end the game. Are you sure you want to quit?")
+			if err != nil {
+				log.Println("Error reading keyboard input:", err)
+				break
+			}
+
+			// Check if the user wants to quit
+			if choice == "n" || choice == "N" {
+				g.QuitGame = false
+				continue
+			}
+			if choice == "y" || choice == "Y" {
+				break
+			} else {
+				fmt.Println("Invalid choice. Please enter 'y' or 'n'.")
+				continue
+			}
+
+		}
+
+		// Check if the enemy is dead
+		// if g.CurrentEnemy.Health <= 0 {
+		//  fmt.Printf("You defeated the %s!\n", g.CurrentEnemy.Name)
+		//  return
+		// }
+	}
+}
+
 // HandleCombatChoice handles user's combat choice including selecting an implant if needed.
 func HandleCombatChoice(g *Game) {
-	quitGame := false
+	g.QuitGame = false
 	for {
 		fmt.Println("\r\nChoose your action:")
 
@@ -248,8 +336,7 @@ func HandleCombatChoice(g *Game) {
 
 		case 'Q', 'q':
 			// Quit the game
-			fmt.Println("You chose to quit the game. Goodbye!")
-			quitGame = true
+			g.QuitGame = true
 			return // Exit the function, effectively ending the game loop
 
 		case 'G', 'g':
@@ -291,7 +378,7 @@ func HandleCombatChoice(g *Game) {
 			fmt.Println("Game Over! You are dead.")
 			break
 		}
-		if quitGame {
+		if g.QuitGame {
 			break
 		}
 	}
@@ -301,70 +388,12 @@ func HandleCombatChoice(g *Game) {
 func StartNewEncounter(g *Game) {
 	// Reset the health drone availability for the new encounter
 	g.UsedHealthDrone = false
+
+	// Declare quitGame variable
+	g.QuitGame = false
+
 	// Continue with encounter setup...
 	HandleEncounter(g)
-}
-
-// Function to handle an encounter.
-func HandleEncounter(g *Game) {
-	doorutil.ClearScreen()
-
-	// Print player information
-	fmt.Printf("Name: %s\n", g.Player.Name)
-	fmt.Printf("Health: %d\n", g.Player.Health)
-
-	// Display the health record using the DisplayHealthRecord method
-	// fmt.Printf("%s", g.Player.DisplayHealthRecord())
-
-	// Show available implants
-	fmt.Println("\r\nImplants:")
-	if g.Player.Implant.Name != "" {
-		fmt.Printf("- %s\r\n", g.Player.Implant.Name)
-	} else {
-		fmt.Println("- No implants equipped")
-	}
-
-	// Show available weapons and their ammo
-	fmt.Println("\r\nWeapons:")
-	for _, w := range g.Player.Weapons {
-		// Check if the weapon is of type "Ranged"
-		if w.WeaponTypeName == "Ranged Weapon" {
-			fmt.Printf("- %s (Ammo: %d)\r\n", w.Name, w.Ammo)
-		} else {
-			fmt.Printf("- %s\r\n", w.Name)
-		}
-	}
-
-	// Print player's equipped gear
-	fmt.Println("Equipped Gear:")
-	if len(g.Gear) == 0 {
-		fmt.Println("- None")
-	} else {
-		for _, g := range g.Gear {
-			fmt.Printf("- %s\n", g.Name)
-		}
-	}
-
-	// Start the game loop
-	for {
-		// Present combat options
-		PresentCombatOptions(g)
-
-		// Handle user choice
-		HandleCombatChoice(g)
-
-		// Check if the player is dead
-		if g.Player.Health <= 0 {
-			fmt.Println("Game Over! You are dead.")
-			return
-		}
-
-		// Check if the enemy is dead
-		if g.CurrentEnemy.Health <= 0 {
-			fmt.Printf("You defeated the %s!\n", g.CurrentEnemy.Name)
-			return
-		}
-	}
 }
 
 // Function to get user's choice.
@@ -468,11 +497,11 @@ func ShootWithRangedWeapon(g *Game) {
 		// Apply damage based on ammo hits and enemy's vulnerabilities
 		switch selectedWeapon.AmmoType {
 		case "Energy":
-			enemy.Health -= ammoHits["Energy"] * enemy.EnemyEnerDamage
+			enemy.StrDie -= ammoHits["Energy"] * enemy.EnemyEnerDamage
 		case "Ballistic":
-			enemy.Health -= ammoHits["Ballistic"] * enemy.EnemyBallDamage
+			enemy.StrDie -= ammoHits["Ballistic"] * enemy.EnemyBallDamage
 		case "Explosive":
-			enemy.Health -= ammoHits["Explosive"] * enemy.EnemyExplDamage
+			enemy.StrDie -= ammoHits["Explosive"] * enemy.EnemyExplDamage
 		}
 	}
 
@@ -484,16 +513,16 @@ func applyRandomVulnerabilityReduction(enemy *enemy.Enemy, ammoType string) {
 	// Determine which vulnerability to reduce based on the ammo type
 	switch ammoType {
 	case "Energy":
-		if enemy.ToHitMightDie > 0 {
-			enemy.ToHitMightDie--
+		if enemy.StrDie > 0 {
+			enemy.StrDie--
 		}
 	case "Ballistic":
-		if enemy.ToHitCunningDie > 0 {
-			enemy.ToHitCunningDie--
+		if enemy.DexDie > 0 {
+			enemy.DexDie--
 		}
 	case "Explosive":
-		if enemy.ToHitWisdomDie > 0 {
-			enemy.ToHitWisdomDie--
+		if enemy.IntDie > 0 {
+			enemy.IntDie--
 		}
 	}
 }

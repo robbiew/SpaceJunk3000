@@ -13,12 +13,10 @@ import (
 // Enemy represents the characteristics of a game enemy.
 type Enemy struct {
 	Name               string `json:"name"`
-	Health             int    `json:"health"`
-	Damage             int    `json:"damage"`
 	Desc               string `json:"desc"`
-	ToHitMightDie      int    `json:"toHitMightDie"`
-	ToHitCunningDie    int    `json:"toHitCunningDie"`
-	ToHitWisdomDie     int    `json:"toHitWisdomDie"`
+	StrDie             int    `json:"strDie"`
+	DexDie             int    `json:"dexDie"`
+	IntDie             int    `json:"IntDie"`
 	EnemyBallDamage    int    `json:"enemyBallDamage"`
 	EnemyEnerDamage    int    `json:"enemyEnerDamage"`
 	EnemyExplDamage    int    `json:"enemyExplDamage"`
@@ -29,15 +27,13 @@ type Enemy struct {
 }
 
 // NewEnemy creates a new enemy with the given attributes.
-func NewEnemy(name string, health, damage int, desc string, toHitMightDie, toHitCunningDie, toHitWisdomDie, enemyBallDamage, enemyEnerDamage, enemyExplDamage, playerRangedDamage, playerCloseDamage, itemDrop int, initiative bool) *Enemy {
+func NewEnemy(name string, health, damage int, desc string, strDie, dexDie, intDie, enemyBallDamage, enemyEnerDamage, enemyExplDamage, playerRangedDamage, playerCloseDamage, itemDrop int, initiative bool) *Enemy {
 	return &Enemy{
 		Name:               name,
-		Health:             health,
-		Damage:             damage,
 		Desc:               desc,
-		ToHitMightDie:      toHitMightDie,
-		ToHitCunningDie:    toHitCunningDie,
-		ToHitWisdomDie:     toHitWisdomDie,
+		StrDie:             strDie,
+		DexDie:             dexDie,
+		IntDie:             intDie,
 		EnemyBallDamage:    enemyBallDamage,
 		EnemyEnerDamage:    enemyEnerDamage,
 		EnemyExplDamage:    enemyExplDamage,

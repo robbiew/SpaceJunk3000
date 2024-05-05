@@ -4,16 +4,27 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
 	"spacejunk3000/doorutil"
 	"spacejunk3000/enemy"
 	"spacejunk3000/game"
 	"spacejunk3000/implant"
-
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
+	"syscall"
 )
 
 func main() {
+	// Trap SIGINT (Ctrl+C) and SIGTERM signals to gracefully exit the program
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+		<-sig
+		fmt.Println("\nExiting the game...")
+		os.Exit(0)
+	}()
+
 	doorutil.ClearScreen()
 
 	// Define flags
@@ -96,6 +107,29 @@ func main() {
 		log.Fatalf("Failed to initialize game: %v", err)
 	}
 
-	// Start the encounter
-	game.StartNewEncounter(g)
+	// Start the game loop
+
+	for {
+		game.StartNewEncounter(g)
+		// Check if player is dead
+		if g.Player.Health <= 0 {
+			fmt.Println("You have died!")
+			break
+		}
+		// Check if player has defeated all enemies
+		if len(g.Enemies) == 0 {
+			fmt.Println("You have defeated all enemies!")
+			break
+		}
+		// Check if player has reached the end of the game
+		if g.Player.NodeNum == 10 {
+			fmt.Println("You have reached the end of the game!")
+			break
+		}
+		if g.QuitGame {
+			break
+		}
+	}
+
+	fmt.Println("Goodbye!")
 }

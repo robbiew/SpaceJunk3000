@@ -43,9 +43,9 @@ const (
 )
 
 type Stats struct {
-	Might   int `json:"might"`
-	Cunning int `json:"cunning"`
-	Wisdom  int `json:"wisdom"`
+	Strength     int `json:"strength"`
+	Dexterity    int `json:"dexterity"`
+	Intelligence int `json:"intelligence"`
 }
 
 // CrewDice represents the crew dice associated with each character type.
@@ -100,17 +100,17 @@ func NewPlayer(name string, charType CharacterType, timeLeft int, nodeNum int, e
 func GetCharacterStats(charType CharacterType) (Stats, error) {
 	switch charType {
 	case Pirate: // Miller
-		return Stats{Might: 3, Cunning: 4, Wisdom: 1}, nil
+		return Stats{Strength: 3, Dexterity: 4, Intelligence: 1}, nil
 	case Marine: // Smith
-		return Stats{Might: 4, Cunning: 1, Wisdom: 3}, nil
+		return Stats{Strength: 4, Dexterity: 1, Intelligence: 3}, nil
 	case Empath: // Tailor
-		return Stats{Might: 1, Cunning: 4, Wisdom: 3}, nil
+		return Stats{Strength: 1, Dexterity: 4, Intelligence: 3}, nil
 	case Spy: // Tanner
-		return Stats{Might: 1, Cunning: 3, Wisdom: 4}, nil
+		return Stats{Strength: 1, Dexterity: 3, Intelligence: 4}, nil
 	case Scientist: // Abbot
-		return Stats{Might: 3, Cunning: 1, Wisdom: 4}, nil
+		return Stats{Strength: 3, Dexterity: 1, Intelligence: 4}, nil
 	case Smuggler: // Cook
-		return Stats{Might: 4, Cunning: 3, Wisdom: 1}, nil
+		return Stats{Strength: 4, Dexterity: 3, Intelligence: 1}, nil
 	default:
 		return Stats{}, fmt.Errorf("try again")
 	}
@@ -121,57 +121,57 @@ func GetCrewDice(charType CharacterType) (CrewDice, error) {
 	switch charType {
 	case Pirate: // Miller
 		return CrewDice{
-			DieSide1: "cunning",
-			DieSide2: "might",
-			DieSide3: "double cunning",
-			DieSide4: "cunning",
-			DieSide5: "wisdom",
-			DieSide6: "ddouble might",
+			DieSide1: "dexerity",
+			DieSide2: "strength",
+			DieSide3: "double dexerity",
+			DieSide4: "dexerity",
+			DieSide5: "intelligence",
+			DieSide6: "ddouble strength",
 		}, nil
 	case Marine: // Smith
 		return CrewDice{
-			DieSide1: "might",
-			DieSide2: "cunning",
-			DieSide3: "double wisdom",
-			DieSide4: "might",
-			DieSide5: "wisdom",
-			DieSide6: "double might",
+			DieSide1: "strength",
+			DieSide2: "dexterity",
+			DieSide3: "double intelligence",
+			DieSide4: "strength",
+			DieSide5: "intelligence",
+			DieSide6: "double strength",
 		}, nil
 	case Empath: // Tailor
 		return CrewDice{
-			DieSide1: "cunning",
-			DieSide2: "might",
-			DieSide3: "double wisdom",
-			DieSide4: "cunning",
-			DieSide5: "might",
-			DieSide6: "double cunning",
+			DieSide1: "dexterity",
+			DieSide2: "strength",
+			DieSide3: "double intelligence",
+			DieSide4: "dexterity",
+			DieSide5: "strength",
+			DieSide6: "double dexterity",
 		}, nil
 	case Spy: // Tanner
 		return CrewDice{
-			DieSide1: "wisdom",
-			DieSide2: "cunning",
-			DieSide3: "double wisdom",
-			DieSide4: "wisdom",
-			DieSide5: "cunning",
-			DieSide6: "double cunning",
+			DieSide1: "intelligence",
+			DieSide2: "dexterity",
+			DieSide3: "double intelligence",
+			DieSide4: "intelligence",
+			DieSide5: "dexterity",
+			DieSide6: "double dexterity",
 		}, nil
 	case Scientist: // Abbot
 		return CrewDice{
-			DieSide1: "wisdom",
-			DieSide2: "cunning",
-			DieSide3: "double wisdom",
-			DieSide4: "wisdom",
-			DieSide5: "cunning",
-			DieSide6: "double might",
+			DieSide1: "intelligence",
+			DieSide2: "dexterity",
+			DieSide3: "double intelligence",
+			DieSide4: "intelligence",
+			DieSide5: "dexterity",
+			DieSide6: "double strength",
 		}, nil
 	case Smuggler: // Cook
 		return CrewDice{
-			DieSide1: "might",
-			DieSide2: "cunning",
-			DieSide3: "double cunning",
-			DieSide4: "might",
-			DieSide5: "cunning",
-			DieSide6: "double might",
+			DieSide1: "strength",
+			DieSide2: "dexterity",
+			DieSide3: "double dexterity",
+			DieSide4: "strength",
+			DieSide5: "dexterity",
+			DieSide6: "double strength",
 		}, nil
 	default:
 		return CrewDice{}, fmt.Errorf("unsupported character type")
