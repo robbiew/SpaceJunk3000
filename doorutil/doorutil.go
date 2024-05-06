@@ -232,12 +232,17 @@ func trimLastChar(s string) string {
 	return s
 }
 
-// Print ANSI art at an X, Y location
 func PrintAnsiLoc(artfile string, x int, y int) {
 	yLoc := y
 
-	noSauce := TrimStringFromSauce(artfile) // strip off the SAUCE metadata
-	s := bufio.NewScanner(strings.NewReader(string(noSauce)))
+	// read the ANSI file
+	content, err := ReadAnsiFile(artfile)
+	if err != nil {
+		log.Fatalf("Error reading file %s: %v", artfile, err)
+	}
+
+	noSauce := TrimStringFromSauce(content) // strip off the SAUCE metadata
+	s := bufio.NewScanner(strings.NewReader(noSauce))
 
 	for s.Scan() {
 		fmt.Fprintf(os.Stdout, Esc+strconv.Itoa(yLoc)+";"+strconv.Itoa(x)+"f"+s.Text())
@@ -260,7 +265,8 @@ func CenterText(s string, w int) {
 	fmt.Fprintf(os.Stdout, Cyan+"%[1]*s\n", -w, fmt.Sprintf("%[1]*s"+Reset, padding+len(s), s))
 }
 
-func centerTextAlt(text string, width int) string {
+// CenterTextAlt horizontally centers some text
+func CenterTextAlt(text string, width int) string {
 	if len(text) >= width {
 		return text[:width] // Truncate if text is too long
 	}

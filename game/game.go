@@ -125,7 +125,7 @@ func SelectCharacterType() player.CharacterType {
 
 	// Clear the screen and display the character selection menu
 	doorutil.ClearScreen()
-	doorutil.DisplayAnsiFile("assets/selectCrew.ans", true)
+	doorutil.DisplayAnsiFile("assets/selectCrew.ans", false)
 
 	for {
 		// Initialize keyboard listener
@@ -163,6 +163,14 @@ func SelectCharacterType() player.CharacterType {
 	}
 }
 
+func CombatUI(g *Game) {
+	// Get the player's character type and convert to string
+	charType := fmt.Sprintf("%v", g.Player.Type)
+	doorutil.ClearScreen()
+	fmt.Println(doorutil.BgMagenta + "                                         " + doorutil.Reset)
+	doorutil.PrintAnsiLoc("assets/"+charType+".ans", 1, 2)
+}
+
 // Function to present the user with combat options.
 func PresentCombatOptions(g *Game) {
 	fmt.Println("\r\nEncounter!")
@@ -191,7 +199,6 @@ func PresentCombatOptions(g *Game) {
 
 // Function to handle an encounter.
 func HandleEncounter(g *Game) {
-	doorutil.ClearScreen()
 
 	// Print player information
 	fmt.Printf("Name: %s\n", g.Player.Name)
@@ -231,6 +238,9 @@ func HandleEncounter(g *Game) {
 
 	// Start the game loop
 	for {
+
+		// Display the combat UI
+		CombatUI(g)
 		// Present combat options
 		PresentCombatOptions(g)
 

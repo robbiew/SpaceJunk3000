@@ -48,7 +48,7 @@ func main() {
 
 		doorutil.ClearScreen()
 		doorutil.CursorHide()
-		doorutil.DisplayAnsiFile("assets/start.ans", true)
+		doorutil.DisplayAnsiFile("assets/start.ans", false)
 
 		err := doorutil.WaitForAnyKey()
 		if err != nil {

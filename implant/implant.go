@@ -44,7 +44,7 @@ func SelectImplant(implants []Implant) Implant {
 	// for i, imp := range implants {
 	// 	fmt.Printf("%d. %s - %s\n", i+1, imp.Name, imp.Desc)
 	// }
-	doorutil.DisplayAnsiFile("assets/selectImplant.ans", true)
+	doorutil.DisplayAnsiFile("assets/selectImplant.ans", false)
 
 	for {
 		// Initialize keyboard listener
