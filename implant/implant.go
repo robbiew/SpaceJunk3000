@@ -6,8 +6,6 @@ import (
 	"os"
 	"spacejunk3000/door"
 	"strconv"
-
-	"github.com/eiannone/keyboard"
 )
 
 // Implant represents the characteristics of a cybernetic implant.
@@ -37,37 +35,21 @@ func LoadImplants(filename string) ([]Implant, error) {
 	return implants, nil
 }
 
-// SelectImplant prompts the user to select an implant from the available options.
 func SelectImplant(implants []Implant) Implant {
-	door.ClearScreen()
-	// fmt.Println("Choose your cybernetic implant:")
-	// for i, imp := range implants {
-	// 	fmt.Printf("%d. %s - %s\n", i+1, imp.Name, imp.Desc)
-	// }
-	door.DisplayAnsiFile("assets/selectImplant.ans", false)
+	door.ClearScreenAndDisplay("assets/selectImplant.ans")
 
 	for {
-		// Initialize keyboard listener
-		err := keyboard.Open()
-		if err != nil {
-			fmt.Println("Error opening keyboard:", err)
-			return Implant{} // Return a default value
-		}
-		defer keyboard.Close()
-
-		// Listen for single key press
-		char, _, err := keyboard.GetSingleKey()
+		input, err := door.GetKeyboardInput()
 		if err != nil {
 			fmt.Println("Error reading keyboard input:", err)
 			continue
 		}
 
-		// Convert the pressed key to index
-		index, err := strconv.Atoi(string(char))
+		index, err := strconv.Atoi(input)
 		if err == nil && index >= 1 && index <= len(implants) {
-			return implants[index-1] // Return the selected implant
+			return implants[index-1]
 		}
 
-		fmt.Println("Invalid choice, please select a valid implant.")
+		door.HandleInvalidInput()
 	}
 }

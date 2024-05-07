@@ -120,45 +120,31 @@ func StartGame(playerName string, weapons []weapon.Weapon, implants []implant.Im
 	return p, nil
 }
 
-// SelectCharacterType prompts the user to select a character type.
 func SelectCharacterType() player.CharacterType {
-
-	// Clear the screen and display the character selection menu
-	door.ClearScreen()
-	door.DisplayAnsiFile("assets/selectCrew.ans", false)
+	door.ClearScreenAndDisplay("assets/selectCrew.ans")
 
 	for {
-		// Initialize keyboard listener
-		err := keyboard.Open()
-		if err != nil {
-			fmt.Println("Error opening keyboard:", err)
-			return ""
-		}
-		defer keyboard.Close()
-
-		// Listen for single key press
-		char, _, err := keyboard.GetSingleKey()
+		input, err := door.GetKeyboardInput()
 		if err != nil {
 			fmt.Println("Error reading keyboard input:", err)
 			continue
 		}
 
-		// Convert the pressed key to character type
-		switch char {
-		case '1':
+		switch input {
+		case "1":
 			return player.Pirate
-		case '2':
+		case "2":
 			return player.Marine
-		case '3':
+		case "3":
 			return player.Empath
-		case '4':
+		case "4":
 			return player.Spy
-		case '5':
+		case "5":
 			return player.Scientist
-		case '6':
+		case "6":
 			return player.Smuggler
 		default:
-			fmt.Println("Invalid choice, please select a valid character type.")
+			door.HandleInvalidInput()
 		}
 	}
 }

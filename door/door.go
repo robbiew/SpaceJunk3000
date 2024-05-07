@@ -101,6 +101,36 @@ const (
 	Reset = Esc + "0m"
 )
 
+// ClearScreenAndDisplay clears the screen and displays an ANSI file.
+func ClearScreenAndDisplay(filename string) {
+	ClearScreen()
+	DisplayAnsiFile(filename, false)
+}
+
+// HandleInvalidInput displays an error message for invalid input.
+func HandleInvalidInput() {
+	MoveCursor(2, 23)
+	fmt.Printf("%s%sInvalid choice.%s", BgRed, RedHi, Reset)
+	time.Sleep(1 * time.Second)
+	MoveCursor(2, 23)
+	fmt.Printf("%s%s               %s", BgRed, RedHi, Reset)
+}
+
+func GetKeyboardInput() (string, error) {
+	err := keyboard.Open()
+	if err != nil {
+		return "", err
+	}
+	defer keyboard.Close()
+
+	char, _, err := keyboard.GetSingleKey()
+	if err != nil {
+		return "", err
+	}
+
+	return string(char), nil
+}
+
 // Prompt the user and get their choice
 func PromptYesNo(question string) (string, error) {
 	// Print the prompt
