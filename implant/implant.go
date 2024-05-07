@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"spacejunk3000/doorutil"
+	"spacejunk3000/door"
 	"strconv"
 
 	"github.com/eiannone/keyboard"
@@ -39,12 +39,12 @@ func LoadImplants(filename string) ([]Implant, error) {
 
 // SelectImplant prompts the user to select an implant from the available options.
 func SelectImplant(implants []Implant) Implant {
-	doorutil.ClearScreen()
+	door.ClearScreen()
 	// fmt.Println("Choose your cybernetic implant:")
 	// for i, imp := range implants {
 	// 	fmt.Printf("%d. %s - %s\n", i+1, imp.Name, imp.Desc)
 	// }
-	doorutil.DisplayAnsiFile("assets/selectImplant.ans", false)
+	door.DisplayAnsiFile("assets/selectImplant.ans", false)
 
 	for {
 		// Initialize keyboard listener

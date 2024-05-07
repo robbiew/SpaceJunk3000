@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"spacejunk3000/doorutil"
+	"spacejunk3000/door"
 	"spacejunk3000/enemy"
 	"spacejunk3000/game"
 	"spacejunk3000/implant"
@@ -25,7 +25,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	doorutil.ClearScreen()
+	door.ClearScreen()
 
 	// Define flags
 	dropfilePath := flag.String("door32", "", "path to the Door32.sys drop file")
@@ -37,7 +37,10 @@ func main() {
 	}
 
 	// Get BBS dropfile information about the user
-	dropAlias, dropTimeLeft, dropEmulation, nodeNum := doorutil.DropFileData(*dropfilePath)
+	dropAlias, dropTimeLeft, dropEmulation, nodeNum, err := door.DropFileData(*dropfilePath)
+	if err != nil {
+		log.Fatalf("Error processing drop file: %v", err)
+	}
 
 	// Use dropAlias as the playerName
 	playerName := dropAlias
@@ -46,11 +49,11 @@ func main() {
 	p, err := player.LoadPlayer(playerName)
 	if err != nil {
 
-		doorutil.ClearScreen()
-		doorutil.CursorHide()
-		doorutil.DisplayAnsiFile("assets/start.ans", false)
+		door.ClearScreen()
+		door.CursorHide()
+		door.DisplayAnsiFile("assets/start.ans", false)
 
-		err := doorutil.WaitForAnyKey()
+		err := door.WaitForAnyKey()
 		if err != nil {
 			fmt.Println("Error:", err)
 			return
@@ -108,7 +111,6 @@ func main() {
 	}
 
 	// Start the game loop
-
 	for {
 		game.StartNewEncounter(g)
 		// Check if player is dead

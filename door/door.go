@@ -1,10 +1,14 @@
-package doorutil
+// BBS door utilities for handling ANSI art, user input, and dropfile data.
+
+package door
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -208,6 +212,38 @@ func PrintAnsi(artContent string, delay int, localDisplay bool) { // localDispla
 	}
 }
 
+// Print ANSI art at an X, Y location after removing SAUCE metadata
+func PrintAnsiLoc(artfile string, x, y int) error {
+	// Open the file
+	file, err := os.Open(artfile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Create a scanner to read the file line by line
+	scanner := bufio.NewScanner(file)
+
+	// Move to the specified Y coordinate
+	fmt.Printf("\033[%d;%df", y, x)
+
+	// Read and print each line at the specified location after removing SAUCE metadata
+	for scanner.Scan() {
+		line := scanner.Text()
+		line = TrimStringFromSauce(line)
+		fmt.Printf("%s\n", line)
+		y++
+		fmt.Printf("\033[%d;%df", y, x) // Move to the next line at the specified X coordinate
+	}
+
+	// Check for any scanner errors
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // TrimStringFromSauce trims SAUCE metadata from a string.
 func TrimStringFromSauce(s string) string {
 	return trimMetadata(s, "COMNT", "SAUCE00")
@@ -232,107 +268,141 @@ func trimLastChar(s string) string {
 	return s
 }
 
-func PrintAnsiLoc(artfile string, x int, y int) {
-	yLoc := y
-
-	// read the ANSI file
-	content, err := ReadAnsiFile(artfile)
-	if err != nil {
-		log.Fatalf("Error reading file %s: %v", artfile, err)
-	}
-
-	noSauce := TrimStringFromSauce(content) // strip off the SAUCE metadata
-	s := bufio.NewScanner(strings.NewReader(noSauce))
-
-	for s.Scan() {
-		fmt.Fprintf(os.Stdout, Esc+strconv.Itoa(yLoc)+";"+strconv.Itoa(x)+"f"+s.Text())
-		yLoc++
-	}
-}
-
 // Print text at an X, Y location
 func PrintStringLoc(text string, x int, y int) {
 	fmt.Fprintf(os.Stdout, Esc+strconv.Itoa(y)+";"+strconv.Itoa(x)+"f"+text)
 }
 
-// CenterText horizontally centers some text
-func CenterText(s string, w int) {
-	padding := (w - len(s)) / 2
-	if padding < 0 {
-		padding = 0
+// CenterAlignText center-aligns text while preserving ANSI escape sequences and supports foreground and background colors.
+func CenterAlignText(text string, width int, foreground, background string) string {
+	// Regular expression to find ANSI escape sequences
+	ansiRegex := regexp.MustCompile(`\x1b\[[0-9;]+m`)
+
+	// Split the input text into segments of plain text and ANSI escape sequences
+	segments := ansiRegex.Split(text, -1)
+	escapeSequences := ansiRegex.FindAllString(text, -1)
+
+	// Calculate the total length of the input text (including ANSI escape sequences)
+	totalLength := 0
+	for _, segment := range segments {
+		totalLength += len(segment)
 	}
-	// Pad the left side of the string with spaces to center the text
-	fmt.Fprintf(os.Stdout, Cyan+"%[1]*s\n", -w, fmt.Sprintf("%[1]*s"+Reset, padding+len(s), s))
+	totalLength += len(strings.Join(escapeSequences, ""))
+
+	// Calculate the number of spaces needed for center alignment
+	spacesNeeded := (width - totalLength) / 2
+
+	// Prepare the center-aligned text
+	var alignedText strings.Builder
+	for i := 0; i < len(segments); i++ {
+		if i == 0 && foreground != "" {
+			alignedText.WriteString(foreground)
+		}
+		if i == 0 && background != "" {
+			alignedText.WriteString(background)
+		}
+		alignedText.WriteString(strings.Repeat(" ", spacesNeeded))
+		alignedText.WriteString(segments[i])
+		if i < len(escapeSequences) {
+			alignedText.WriteString(strings.Repeat(" ", spacesNeeded))
+			alignedText.WriteString(escapeSequences[i])
+		}
+	}
+
+	return alignedText.String()
 }
 
-// CenterTextAlt horizontally centers some text
-func CenterTextAlt(text string, width int) string {
-	if len(text) >= width {
-		return text[:width] // Truncate if text is too long
+// RightAlignText right-aligns text while preserving ANSI escape sequences and supports foreground and background colors.
+func RightAlignText(text string, width int, foreground, background string) string {
+	// Regular expression to find ANSI escape sequences
+	ansiRegex := regexp.MustCompile(`\x1b\[[0-9;]+m`)
+
+	// Split the input text into segments of plain text and ANSI escape sequences
+	segments := ansiRegex.Split(text, -1)
+	escapeSequences := ansiRegex.FindAllString(text, -1)
+
+	// Calculate the total length of the input text (including ANSI escape sequences)
+	totalLength := 0
+	for _, segment := range segments {
+		totalLength += len(segment)
 	}
-	leftPadding := (width - len(text)) / 2
-	rightPadding := width - len(text) - leftPadding
-	return strings.Repeat(" ", leftPadding) + text + strings.Repeat(" ", rightPadding)
+	totalLength += len(strings.Join(escapeSequences, ""))
+
+	// Calculate the number of spaces needed for right alignment
+	spacesNeeded := width - totalLength
+
+	// Prepare the right-aligned text
+	var alignedText strings.Builder
+	for i := 0; i < len(segments); i++ {
+		if i < len(escapeSequences) {
+			alignedText.WriteString(escapeSequences[i])
+		}
+		if i == 0 && foreground != "" {
+			alignedText.WriteString(foreground)
+		}
+		if i == 0 && background != "" {
+			alignedText.WriteString(background)
+		}
+		alignedText.WriteString(strings.Repeat(" ", spacesNeeded))
+		alignedText.WriteString(segments[i])
+	}
+
+	return alignedText.String()
 }
 
-func DropFileData(path string) (string, int, int, int) {
-	// path needs to include trailing slash!
-	var dropAlias string
-	var dropTimeLeft string
-	var dropEmulation string
-	var nodeNum string
+func DropFileData(path string) (string, int, int, int, error) {
+	// Append trailing slash to path if it doesn't exist
+	if !strings.HasSuffix(path, "/") {
+		path += "/"
+	}
 
+	// Check if the file exists
+	fileInfo, err := os.Stat(strings.ToLower(path + "door32.sys"))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", 0, 0, 0, errors.New("file does not exist")
+		}
+		return "", 0, 0, 0, err
+	}
+
+	// Check if the file is empty
+	if fileInfo.Size() == 0 {
+		return "", 0, 0, 0, errors.New("file is empty")
+	}
+
+	// Open the file
 	file, err := os.Open(strings.ToLower(path + "door32.sys"))
 	if err != nil {
-		log.Fatal(err)
+		return "", 0, 0, 0, err
 	}
+	defer file.Close()
 
+	// Read lines from the file
 	scanner := bufio.NewScanner(file)
-	scanner.Split(bufio.ScanLines)
 	var text []string
-
 	for scanner.Scan() {
 		text = append(text, scanner.Text())
 	}
 
-	file.Close()
+	// Extract drop file data
+	dropAlias := text[6]
+	dropTimeLeft := text[8]
+	dropEmulation := text[9]
+	nodeNum := text[10]
 
-	count := 0
-	for _, line := range text {
-		if count == 6 {
-			dropAlias = line
-		}
-		if count == 8 {
-			dropTimeLeft = line
-		}
-		if count == 9 {
-			dropEmulation = line
-		}
-		if count == 10 {
-			nodeNum = line
-		}
-		if count == 11 {
-			break
-		}
-		count++
-	}
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	timeInt, err := strconv.Atoi(dropTimeLeft) // return as int
+	// Convert timeLeft and emulation to integers
+	timeInt, err := strconv.Atoi(dropTimeLeft)
 	if err != nil {
-		log.Fatal(err)
+		return "", 0, 0, 0, err
+	}
+	emuInt, err := strconv.Atoi(dropEmulation)
+	if err != nil {
+		return "", 0, 0, 0, err
+	}
+	nodeInt, err := strconv.Atoi(nodeNum)
+	if err != nil {
+		return "", 0, 0, 0, err
 	}
 
-	emuInt, err := strconv.Atoi(dropEmulation) // return as int
-	if err != nil {
-		log.Fatal(err)
-	}
-	nodeInt, err := strconv.Atoi(nodeNum) // return as int
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return dropAlias, timeInt, emuInt, nodeInt
+	return dropAlias, timeInt, emuInt, nodeInt, nil
 }

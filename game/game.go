@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"spacejunk3000/doorutil"
+	"spacejunk3000/door"
 	"spacejunk3000/dropitem"
 	"spacejunk3000/enemy"
 	"spacejunk3000/gear"
@@ -124,8 +124,8 @@ func StartGame(playerName string, weapons []weapon.Weapon, implants []implant.Im
 func SelectCharacterType() player.CharacterType {
 
 	// Clear the screen and display the character selection menu
-	doorutil.ClearScreen()
-	doorutil.DisplayAnsiFile("assets/selectCrew.ans", false)
+	door.ClearScreen()
+	door.DisplayAnsiFile("assets/selectCrew.ans", false)
 
 	for {
 		// Initialize keyboard listener
@@ -166,32 +166,41 @@ func SelectCharacterType() player.CharacterType {
 func CombatUI(g *Game) {
 	// Get the player's character type and convert to string
 	charType := fmt.Sprintf("%v", g.Player.Type)
-	doorutil.ClearScreen()
-	fmt.Println(doorutil.BgMagenta + "                                         " + doorutil.Reset)
-	doorutil.PrintAnsiLoc("assets/"+charType+".ans", 1, 2)
+	door.ClearScreen()
+
+	width := 39
+
+	// Right-align the text
+	alignedText := door.RightAlignText("Hello World!", width, door.WhiteHi, door.BgYellow)
+
+	// Print the right-aligned text
+	fmt.Println(alignedText, door.Reset)
+
+	// Print ANSI art
+	door.PrintAnsiLoc("assets/"+charType+".ans", 1, 2)
 }
 
 // Function to present the user with combat options.
 func PresentCombatOptions(g *Game) {
-	fmt.Println("\r\nEncounter!")
+	fmt.Print("\r\nEncounter!]\r\n")
 	fmt.Printf("You've encountered an enemy: %s\r\n", g.CurrentEnemy.Name)
-	fmt.Println("\r\nChoose your action:")
+	fmt.Print("\r\nChoose your action:\r\n")
 
-	fmt.Println("[Q] Quit - run away, lose health, items)")
-	fmt.Println("[G] Use Gear")
-	fmt.Println("[C] Use Cyber implant")
+	fmt.Print("[Q] Quit - run away, lose health, items)\r\n")
+	fmt.Print("[G] Use Gear\r\n")
+	fmt.Print("[C] Use Cyber implant\r\n")
 	if !g.UsedHealthDrone {
-		fmt.Println("[H] Activate Health Drone - heal (once per day)")
+		fmt.Print("[H] Activate Health Drone\r\n")
 	} else {
-		fmt.Println("[-] Health Drone is unavailable")
+		fmt.Print("[-] Health Drone is unavailable\r\n")
 	}
-	fmt.Println("[F] Fight - hand to hand")
+	fmt.Print("[F] Fight - hand to hand\r\n")
 
 	// Check if the player has a ranged weapon
 	for _, w := range g.Player.Weapons {
 		if w.WeaponTypeName == "Ranged Weapon" {
-			fmt.Println("[S] Shoot - Ranged Weapon")
-			fmt.Println("[R] Reload - Ranged Weapon")
+			fmt.Print("[S] Shoot - Ranged Weapon\r\n")
+			fmt.Print("[R] Reload - Ranged Weapon\r\n")
 			break
 		}
 	}
@@ -256,7 +265,7 @@ func HandleEncounter(g *Game) {
 		// Check if the player chooses to quit
 		if g.QuitGame {
 			// Prompt for playing again
-			choice, err := doorutil.PromptYesNo("Quitting will end the game. Are you sure you want to quit?")
+			choice, err := door.PromptYesNo("Quitting will end the game. Are you sure you want to quit?")
 			if err != nil {
 				log.Println("Error reading keyboard input:", err)
 				break
