@@ -1,7 +1,7 @@
 [
   {
     "name": "Ray Gun",
-    "type": "Ranged Weapon",
+    "type": "Ranged",
     "ammo_type": "Energy",
     "ammo_capacity": 1,
     "ammo": 1,
@@ -10,12 +10,12 @@
   },
   {
     "name": "Alien Blade",
-    "type": "Close Combat Weapon",
+    "type": "Blade",
     "slots": 2
   },
   {
-    "name": "Battery Cannon",
-    "type": "Ranged Weapon",
+    "name": "Hand Cannon",
+    "type": "Ranged",
     "ammo_type": "Ballistic",
     "ammo_capacity": 3,
     "ammo": 1,

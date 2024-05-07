@@ -101,6 +101,25 @@ const (
 	Reset = Esc + "0m"
 )
 
+func PrintColoredBlock(xColStart, numCols, yRowStart, numRows int, bgColor string) {
+	// Create a blank row with the specified number of columns
+	blankRow := strings.Repeat(" ", numCols)
+
+	// Print the rows before the block
+	for i := 0; i < yRowStart; i++ {
+		fmt.Println()
+	}
+
+	// Print the colored block
+	for i := 0; i < numRows; i++ {
+		// Move the cursor to the starting column
+		fmt.Printf("\033[%dG", xColStart)
+
+		// Print the colored row
+		fmt.Printf("%s%s\033[0m\n", bgColor, blankRow)
+	}
+}
+
 // ClearScreenAndDisplay clears the screen and displays an ANSI file.
 func ClearScreenAndDisplay(filename string) {
 	ClearScreen()

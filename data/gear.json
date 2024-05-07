@@ -8,7 +8,7 @@
   {
     "name": "Grenade",
     "slots": 1,
-    "type": "Damage",
+    "type": "Explosive",
     "damage_type": "Explosive"
   }
 ]

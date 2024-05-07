@@ -149,44 +149,88 @@ func SelectCharacterType() player.CharacterType {
 	}
 }
 
+func printStatSymbol(value int, symbol int) {
+	for i := 0; i < value; i++ {
+		fmt.Printf("%c", symbol)
+	}
+	fmt.Print(" ") // Add a space after the symbols
+}
+
+// Function to display the combat UI.
 func CombatUI(g *Game) {
 	// Get the player's character type and convert to string
 	charType := fmt.Sprintf("%v", g.Player.Type)
+	charName := g.Player.Name
 	door.ClearScreen()
 
 	width := 39
-
-	// Right-align the text
-	alignedText := door.RightAlignText("Hello World!", width, door.WhiteHi, door.BgYellow)
-
-	// Print the right-aligned text
+	// Print player's health
+	alignedText := door.RightAlignText("12", width, door.YellowHi, door.BgYellow)
 	fmt.Println(alignedText, door.Reset)
 
-	// Print ANSI art
+	// Print players name
+	door.MoveCursor(2, 1)
+	fmt.Printf("%s%s%s - %s%s", door.BgYellow, door.WhiteHi, charName, charType, door.Reset)
+
+	// Print heart symbol
+	door.MoveCursor(36, 1)
+	fmt.Printf("%s%s%c%s", door.BgYellow, door.RedHi, 3, door.Reset)
+
+	door.PrintColoredBlock(11, 30, 1, 7, door.BgCyan)
+
 	door.PrintAnsiLoc("assets/"+charType+".ans", 1, 2)
+
+	// Print Player stats
+	door.MoveCursor(13, 4)
+	fmt.Printf("%s%s", door.BgCyan, door.Red)
+	fmt.Print("str ")
+	printStatSymbol(g.Player.Stats.Strength, 6) // Spade symbol
+	fmt.Printf("%s%s", door.BgCyan, door.CyanHi)
+	fmt.Print(" dex ")
+	printStatSymbol(g.Player.Stats.Dexterity, 4) // diamond symbol
+	fmt.Printf("%s%s", door.BgCyan, door.YellowHi)
+	fmt.Print(" int ")
+	printStatSymbol(g.Player.Stats.Intelligence, 15) // Star symbol
+	fmt.Printf("%s", door.Reset)
+
+	// Medical Record & Implant
+	door.MoveCursor(13, 6)
+	fmt.Printf("%s%s[%sM%s%s%s] Medical Record%s", door.BgCyan, door.Yellow, door.YellowHi, door.Reset, door.BgCyan, door.Yellow, door.Reset)
+	door.MoveCursor(13, 7)
+	fmt.Printf("%s%s[%sI%s%s%s] Implant%s", door.BgCyan, door.Yellow, door.YellowHi, door.Reset, door.BgCyan, door.Yellow, door.Reset)
+
+	// Weapons & Gear
+	door.MoveCursor(1, 9)
+	fmt.Printf("%s%s# Name           Wt Type      Ammo Fire %s", door.BgYellow, door.YellowHi, door.Reset)
+	door.MoveCursor(1, 10)
+	player.PrintPlayerInventory(g.Player)
+
 }
 
 // Function to present the user with combat options.
 func PresentCombatOptions(g *Game) {
-	fmt.Print("\r\nEncounter!]\r\n")
-	fmt.Printf("You've encountered an enemy: %s\r\n", g.CurrentEnemy.Name)
-	fmt.Print("\r\nChoose your action:\r\n")
+	// fmt.Printf("You've encountered an enemy: %s\r\n", g.CurrentEnemy.Name)
 
-	fmt.Print("[Q] Quit - run away, lose health, items)\r\n")
-	fmt.Print("[G] Use Gear\r\n")
-	fmt.Print("[C] Use Cyber implant\r\n")
+	door.MoveCursor(1, 15)
+	title := door.CenterAlignText("Combat Options", 39, door.CyanHi, door.BgBlack)
+	fmt.Printf("%s%s", title, door.Reset)
+
+	door.MoveCursor(1, 17)
+
+	fmt.Printf("%s[%sQ%s%s] %sQuit %s(death) %s\r\n", door.BlackHi, door.CyanHi, door.Reset, door.BlackHi, door.Cyan, door.BlackHi, door.Reset)
+	fmt.Printf("%s[%sG%s%s] %sUse Gear %s\r\n", door.BlackHi, door.CyanHi, door.Reset, door.BlackHi, door.Cyan, door.Reset)
 	if !g.UsedHealthDrone {
-		fmt.Print("[H] Activate Health Drone\r\n")
+		fmt.Printf("%s[%sH%s%s] %sHealth Drone %s\r\n", door.BlackHi, door.CyanHi, door.Reset, door.BlackHi, door.Cyan, door.Reset)
 	} else {
-		fmt.Print("[-] Health Drone is unavailable\r\n")
+		fmt.Printf("%s[H] Health Drone unavailable %s\r\n", door.BlackHi, door.Reset)
 	}
-	fmt.Print("[F] Fight - hand to hand\r\n")
+	fmt.Printf("%s[%sF%s%s] %sFight Hand to Hand %s\r\n", door.BlackHi, door.CyanHi, door.Reset, door.BlackHi, door.Cyan, door.Reset)
 
 	// Check if the player has a ranged weapon
 	for _, w := range g.Player.Weapons {
-		if w.WeaponTypeName == "Ranged Weapon" {
-			fmt.Print("[S] Shoot - Ranged Weapon\r\n")
-			fmt.Print("[R] Reload - Ranged Weapon\r\n")
+		if w.WeaponTypeName == "Ranged" {
+			fmt.Printf("%s[%sS%s%s] %sShoot %s\r\n", door.BlackHi, door.CyanHi, door.Reset, door.BlackHi, door.Cyan, door.Reset)
+			fmt.Printf("%s[%sR%s%s] %sReload %s\r\n", door.BlackHi, door.CyanHi, door.Reset, door.BlackHi, door.Cyan, door.Reset)
 			break
 		}
 	}
@@ -214,7 +258,7 @@ func HandleEncounter(g *Game) {
 	fmt.Println("\r\nWeapons:")
 	for _, w := range g.Player.Weapons {
 		// Check if the weapon is of type "Ranged"
-		if w.WeaponTypeName == "Ranged Weapon" {
+		if w.WeaponTypeName == "Ranged" {
 			fmt.Printf("- %s (Ammo: %d)\r\n", w.Name, w.Ammo)
 		} else {
 			fmt.Printf("- %s\r\n", w.Name)
@@ -283,7 +327,6 @@ func HandleEncounter(g *Game) {
 func HandleCombatChoice(g *Game) {
 	g.QuitGame = false
 	for {
-		fmt.Println("\r\nChoose your action:")
 
 		char, _, err := keyboard.GetSingleKey()
 		if err != nil {
@@ -433,7 +476,7 @@ func ShootWithRangedWeapon(g *Game) {
 	// Check if the player has a ranged weapon
 	hasRangedWeapon := false
 	for _, w := range g.Player.Weapons {
-		if w.WeaponTypeName == "Ranged Weapon" {
+		if w.WeaponTypeName == "Ranged" {
 			hasRangedWeapon = true
 			break
 		}
@@ -449,7 +492,7 @@ func ShootWithRangedWeapon(g *Game) {
 		// Implement logic to let the player select a weapon
 		// For simplicity, we'll just select the first ranged weapon
 		for _, w := range g.Player.Weapons {
-			if w.WeaponTypeName == "Ranged Weapon" {
+			if w.WeaponTypeName == "Ranged" {
 				selectedWeapon = w
 				break
 			}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"spacejunk3000/door"
 	"spacejunk3000/gear"
 	"spacejunk3000/implant"
 	"spacejunk3000/weapon"
@@ -56,6 +57,38 @@ type CrewDice struct {
 	DieSide4 string `json:"die_side_4"`
 	DieSide5 string `json:"die_side_5"`
 	DieSide6 string `json:"die_side_6"`
+}
+
+func PrintPlayerInventory(player *Player) {
+	// Create a slice to hold all items (weapons and gear)
+	items := make([]interface{}, 0, player.MaxSlots)
+
+	// Append weapons to the items slice
+	for _, weapon := range player.Weapons {
+		items = append(items, weapon)
+	}
+
+	// Append gear to the items slice
+	for _, gear := range player.Gear {
+		items = append(items, gear)
+	}
+
+	// Print items
+	for i := 0; i < player.MaxSlots; i++ {
+		if i < len(items) {
+			// Print actual item
+			switch item := items[i].(type) {
+			case *weapon.Weapon:
+				fmt.Printf("%s%d %s%-14s %s%-2d %s%-9s %s%-4d %-4d\r\n", door.BlackHi, i+1, door.CyanHi, item.Name, door.Reset, item.Slots, door.Cyan, item.WeaponTypeName, door.Reset, item.Ammo, item.FireRate)
+			case *gear.Gear:
+				fmt.Printf("%d %-18s %-2d %-7s %-4s %-4s\n", i+1, item.Name, item.Slots, item.GearTypeName, "-", "-")
+			}
+		} else {
+			// Print empty row
+			fmt.Printf("%s%d %-14s %-2s %-9s %-4s %-4s%s\r\n", door.BlackHi, i+1, "-", "-", "-", "-", "-", door.Reset)
+		}
+	}
+
 }
 
 // NewPlayer creates a new player instance with the provided attributes.
@@ -267,6 +300,11 @@ func (p *Player) UnequipWeapon() {
 		p.Weapons = p.Weapons[:len(p.Weapons)-1]
 		p.WeaponSlots--
 	}
+	// Save the player's data after equipping the weapon
+	if err := SavePlayer(p); err != nil {
+		fmt.Printf("failed to save player: %v", err)
+	}
+
 }
 
 // AdjustHealth updates the player's health and modifies the health record.
