@@ -11,6 +11,7 @@ import (
 	"spacejunk3000/implant"
 	"spacejunk3000/player"
 	"spacejunk3000/weapon"
+	"strings"
 
 	"strconv"
 	"time"
@@ -159,13 +160,16 @@ func printStatSymbol(value int, symbol int) {
 // Function to display the combat UI.
 func CombatUI(g *Game) {
 	// Get the player's character type and convert to string
-	charType := fmt.Sprintf("%v", g.Player.Type)
+	charType := strings.ToLower(fmt.Sprintf("%v", g.Player.Type))
 	charName := g.Player.Name
 	door.ClearScreen()
 
 	width := 39
+
+	// Convert player's health to string
+	health := strconv.Itoa(g.Player.Health)
 	// Print player's health
-	alignedText := door.RightAlignText("12", width, door.YellowHi, door.BgYellow)
+	alignedText := door.RightAlignText(health, width, door.YellowHi, door.BgYellow)
 	fmt.Println(alignedText, door.Reset)
 
 	// Print players name
@@ -173,15 +177,17 @@ func CombatUI(g *Game) {
 	fmt.Printf("%s%s%s - %s%s", door.BgYellow, door.WhiteHi, charName, charType, door.Reset)
 
 	// Print heart symbol
-	door.MoveCursor(36, 1)
-	fmt.Printf("%s%s%c%s", door.BgYellow, door.RedHi, 3, door.Reset)
+	door.MoveCursor(33, 1)
+	fmt.Printf("%s%s[%sM%s%s%s] %s%s%c%s", door.BgYellow, door.Cyan, door.YellowHi, door.Reset, door.BgYellow, door.Cyan, door.BgYellow, door.RedHi, 3, door.Reset)
 
+	// Print background color block
 	door.PrintColoredBlock(11, 30, 1, 7, door.BgCyan)
 
+	// Print player's character type image
 	door.PrintAnsiLoc("assets/"+charType+".ans", 1, 2)
 
 	// Print Player stats
-	door.MoveCursor(13, 4)
+	door.MoveCursor(13, 3)
 	fmt.Printf("%s%s", door.BgCyan, door.Red)
 	fmt.Print("str ")
 	printStatSymbol(g.Player.Stats.Strength, 6) // Spade symbol
@@ -194,10 +200,15 @@ func CombatUI(g *Game) {
 	fmt.Printf("%s", door.Reset)
 
 	// Medical Record & Implant
+	// door.MoveCursor(13, 5)
+	// fmt.Printf("%s%s[%sM%s%s%s] Medical Record%s", door.BgCyan, door.Yellow, door.YellowHi, door.Reset, door.BgCyan, door.Yellow, door.Reset)
+
+	door.MoveCursor(13, 5)
+	fmt.Printf("%s%sImplants: %s%s %s", door.BgCyan, door.Yellow, door.YellowHi, g.Player.Implant.Name, door.Reset)
+
+	// Max carry weight
 	door.MoveCursor(13, 6)
-	fmt.Printf("%s%s[%sM%s%s%s] Medical Record%s", door.BgCyan, door.Yellow, door.YellowHi, door.Reset, door.BgCyan, door.Yellow, door.Reset)
-	door.MoveCursor(13, 7)
-	fmt.Printf("%s%s[%sI%s%s%s] Implant%s", door.BgCyan, door.Yellow, door.YellowHi, door.Reset, door.BgCyan, door.Yellow, door.Reset)
+	fmt.Printf("%s%sCarry Wt: %s%d%s%s%s/%s%d %s", door.BgCyan, door.Yellow, door.YellowHi, g.Player.GearSlots+g.Player.WeaponSlots, door.Reset, door.BgCyan, door.Yellow, door.YellowHi, g.Player.MaxSlots, door.Reset)
 
 	// Weapons & Gear
 	door.MoveCursor(1, 9)
@@ -240,8 +251,8 @@ func PresentCombatOptions(g *Game) {
 func HandleEncounter(g *Game) {
 
 	// Print player information
-	fmt.Printf("Name: %s\n", g.Player.Name)
-	fmt.Printf("Health: %d\n", g.Player.Health)
+	fmt.Printf("Name: %s\r\n", g.Player.Name)
+	fmt.Printf("Health: %d\r\n", g.Player.Health)
 
 	// Display the health record using the DisplayHealthRecord method
 	// fmt.Printf("%s", g.Player.DisplayHealthRecord())
@@ -271,7 +282,7 @@ func HandleEncounter(g *Game) {
 		fmt.Println("- None")
 	} else {
 		for _, g := range g.Gear {
-			fmt.Printf("- %s\n", g.Name)
+			fmt.Printf("- %s\r\n", g.Name)
 		}
 	}
 
@@ -288,14 +299,14 @@ func HandleEncounter(g *Game) {
 
 		// Check if the player is dead or chooses to quit
 		if g.Player.Health <= 0 {
-			fmt.Println("Game Over! You are dead.")
+			fmt.Println("\r\nGame Over! You are dead.")
 			return
 		}
 
 		// Check if the player chooses to quit
 		if g.QuitGame {
 			// Prompt for playing again
-			choice, err := door.PromptYesNo("Quitting will end the game. Are you sure you want to quit?")
+			choice, err := door.PromptYesNo("\r\nQuitting will end the game. Quit now?")
 			if err != nil {
 				log.Println("Error reading keyboard input:", err)
 				break
@@ -309,7 +320,7 @@ func HandleEncounter(g *Game) {
 			if choice == "y" || choice == "Y" {
 				break
 			} else {
-				fmt.Println("Invalid choice. Please enter 'y' or 'n'.")
+				fmt.Println("\r\nInvalid choice. Please enter 'y' or 'n'.")
 				continue
 			}
 
@@ -317,7 +328,7 @@ func HandleEncounter(g *Game) {
 
 		// Check if the enemy is dead
 		// if g.CurrentEnemy.Health <= 0 {
-		//  fmt.Printf("You defeated the %s!\n", g.CurrentEnemy.Name)
+		//  fmt.Printf("You defeated the %s!\r\n", g.CurrentEnemy.Name)
 		//  return
 		// }
 	}
@@ -337,18 +348,18 @@ func HandleCombatChoice(g *Game) {
 		switch char {
 		case 'F', 'f':
 			// Hand to hand combat logic
-			fmt.Printf("You chose hand to hand combat with %s\n", g.CurrentEnemy.Name)
+			fmt.Printf("You chose hand to hand combat with %s\r\n", g.CurrentEnemy.Name)
 			items, err := g.CurrentEnemy.DropItems()
 			if err != nil {
 				// Handle error
 				fmt.Println("Error dropping items:", err)
 				return
 			}
-			fmt.Printf("Dropped %d items:\n", len(items)) // Print the number of dropped items
+			fmt.Printf("Dropped %d items:\r\n", len(items)) // Print the number of dropped items
 			// Iterate over the dropped items and print thssem
 			for _, item := range items {
 				fmt.Println(item) // Print the dropped item
-				fmt.Println("Do you want to pick up this item? (Y/N)")
+				fmt.Println("\r\nDo you want to pick up this item? (Y/N)")
 				choice, _, err := keyboard.GetSingleKey()
 				if err != nil {
 					fmt.Println("Error reading keyboard input:", err)
@@ -362,22 +373,22 @@ func HandleCombatChoice(g *Game) {
 						// Handle weapon
 						weapon := item.Weapon
 						weaponType := weapon.WeaponType()
-						fmt.Printf("Weapon type: %s\n", weaponType)
+						fmt.Printf("\r\nWeapon type: %s\r\n", weaponType)
 						// Perform other actions specific to weapons
 					case *dropitem.GearWrapper:
 						// Handle gear
 						gear := item.Gear
 						gearType := gear.GearType()
-						fmt.Printf("Gear type: %s\n", gearType)
+						fmt.Printf("\r\nGear type: %s\r\n", gearType)
 						if err := g.Player.EquipGear(gear); err != nil {
 							fmt.Println("Error equipping gear:", err)
 							// Handle error (e.g., inform the player)
 						} else {
-							fmt.Println("Gear equipped successfully:", gear.Name)
+							fmt.Println("\r\nGear equipped successfully:", gear.Name)
 						}
 					default:
 						// Handle unknown item type
-						fmt.Println("Unknown item type:", item)
+						fmt.Println("\r\nUnknown item type:", item)
 					}
 				}
 			}
@@ -399,7 +410,7 @@ func HandleCombatChoice(g *Game) {
 			// Check if the player has an implant
 			if g.Player.Implant.Name != "" {
 				// If the player has an implant, perform actions with it
-				fmt.Printf("You selected %s implant.\n", g.Player.Implant.Name)
+				fmt.Printf("You selected %s implant.\r\n", g.Player.Implant.Name)
 				// Perform actions with the selected implant if needed
 			} else {
 				fmt.Println("You don't have any implants.")
@@ -502,7 +513,7 @@ func ShootWithRangedWeapon(g *Game) {
 	}
 
 	// Check if the player has enough ammo for the required fire rate of the selected weapon
-	fmt.Printf("Selected weapon: %s, Ammo: %d, Fire Rate: %d \n", selectedWeapon.Name, selectedWeapon.Ammo, selectedWeapon.FireRate)
+	fmt.Printf("Selected weapon: %s, Ammo: %d, Fire Rate: %d \r\n", selectedWeapon.Name, selectedWeapon.Ammo, selectedWeapon.FireRate)
 	if selectedWeapon.Ammo < selectedWeapon.FireRate {
 		fmt.Println("You do not have enough ammo for this weapon.")
 		return
@@ -517,7 +528,7 @@ func ShootWithRangedWeapon(g *Game) {
 
 	// Save the player's updated data after firing
 	if err := player.SavePlayer(g.Player); err != nil {
-		fmt.Printf("Error saving player data: %v\n", err)
+		fmt.Printf("Error saving player data: %v\r\n", err)
 	}
 
 	// Roll ammo dice for each ammo fired

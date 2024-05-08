@@ -81,7 +81,7 @@ func PrintPlayerInventory(player *Player) {
 			case *weapon.Weapon:
 				fmt.Printf("%s%d %s%-14s %s%-2d %s%-9s %s%-4d %-4d\r\n", door.BlackHi, i+1, door.CyanHi, item.Name, door.Reset, item.Slots, door.Cyan, item.WeaponTypeName, door.Reset, item.Ammo, item.FireRate)
 			case *gear.Gear:
-				fmt.Printf("%d %-18s %-2d %-7s %-4s %-4s\n", i+1, item.Name, item.Slots, item.GearTypeName, "-", "-")
+				fmt.Printf("%d %-14s %-2d %-9s %-4s %-4s\r\n", i+1, item.Name, item.Slots, item.GearTypeName, "-", "-")
 			}
 		} else {
 			// Print empty row
@@ -326,7 +326,7 @@ func (p *Player) AdjustHealth(amount int) {
 // DisplayHealthRecord outputs the player's health record as a string.
 func (p *Player) DisplayHealthRecord() string {
 	// Top part of the medical record
-	record := "\r\n┌──────────────────────────────┐\n│ MEDICAL RECORD               │\n"
+	record := "\r\n┌──────────────────────────────┐\r\n│ MEDICAL RECORD               │\n"
 
 	// Adding the health points with appropriate symbols
 	for i := 12; i > 0; i-- {
@@ -339,7 +339,7 @@ func (p *Player) DisplayHealthRecord() string {
 				line += "  " // Empty space for lost health points
 			}
 		}
-		record += line + "│\n"
+		record += line + "│\r\n"
 	}
 
 	// Bottom part of the medical record

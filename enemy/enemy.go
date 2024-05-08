@@ -2,7 +2,6 @@ package enemy
 
 import (
 	"encoding/json"
-	"fmt"
 	"math/rand"
 	"os"
 	"spacejunk3000/dropitem"
@@ -69,7 +68,7 @@ func (e *Enemy) DropItems() ([]dropitem.Item, error) {
 		}
 		if len(weapons) > 0 {
 			randomIndex := rand.Intn(len(weapons))
-			fmt.Println("Adding weapon:", weapons[randomIndex].Name) // Debug print
+			// fmt.Println("Adding weapon:", weapons[randomIndex].Name) // Debug print
 			return []dropitem.Item{&dropitem.WeaponWrapper{Weapon: &weapons[randomIndex]}}, nil
 		}
 	} else {
@@ -80,7 +79,7 @@ func (e *Enemy) DropItems() ([]dropitem.Item, error) {
 		}
 		if len(gears) > 0 {
 			randomIndex := rand.Intn(len(gears))
-			fmt.Println("Adding gear:", gears[randomIndex].Name) // Debug print
+			// fmt.Println("Adding gear:", gears[randomIndex].Name) // Debug print
 			return []dropitem.Item{&dropitem.GearWrapper{Gear: &gears[randomIndex]}}, nil
 		}
 	}
